@@ -1,0 +1,8 @@
+GitPython==0.1.6
+Jinja==1.2
+SQLAlchemy==0.5.2
+Werkzeug==0.4.1
+lxml==2.2beta3
+pyflakes==0.3.0
+pyquery==0.3.1
+wsgiref==0.1.2

@@ -1,0 +1,8 @@
+bin
+.Python
+docs/
+include
+lib
+bosley/db.sqlite
+bosley/log
+pip-log.txt

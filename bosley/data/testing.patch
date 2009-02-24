@@ -1,0 +1,45 @@
+From 9a9aac3f9aee0eac16a74abf16a66bd282b90e06 Mon Sep 17 00:00:00 2001
+From: Jeff Balogh <me@jeffbalogh.org>
+Date: Thu, 19 Feb 2009 16:42:19 -0800
+Subject: [PATCH] adding endpoint for test discovery
+
+---
+ site/app/controllers/tests_controller.php |    3 +++
+ site/app/views/tests/discover.thtml       |   11 +++++++++++
+ 2 files changed, 14 insertions(+), 0 deletions(-)
+ create mode 100644 site/app/views/tests/discover.thtml
+
+diff --git a/site/app/controllers/tests_controller.php b/site/app/controllers/tests_controller.php
+index 66cb659..a9a9c89 100644
+--- a/site/app/controllers/tests_controller.php
++++ b/site/app/controllers/tests_controller.php
+@@ -149,6 +149,9 @@ class TestsController extends AppController {
+         elseif (!empty($_GET['group'])) {
+             TestManager::runGroup($_GET['groups'][$_GET['group']], $reporter);
+         }
++        elseif (!empty($_GET['discover'])) {
++            $this->render('discover', 'ajax');
++        }
+         exit();
+     }
+ 
+diff --git a/site/app/views/tests/discover.thtml b/site/app/views/tests/discover.thtml
+new file mode 100644
+index 0000000..5dd5b67
+--- /dev/null
++++ b/site/app/views/tests/discover.thtml
+@@ -0,0 +1,11 @@
++<?php
++
++echo '<?xml version="1.0" ?><cases>';
++
++$testlist = TestManager::getTestCaseList();
++foreach ($testlist as $k=>$testcase) {
++    echo "  <case>{$testcase}</case>\n";
++}
++
++echo '</cases>';
++?>
+-- 
+1.6.1.1
+

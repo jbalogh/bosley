@@ -29,6 +29,9 @@ class Revision(Model):
     id = Column(fields.Integer, primary_key=True)
     svn_id = Column(fields.Integer)
     git_id = Column(fields.String(40))
+    message = Column(fields.Text)
+    author = Column(fields.String(100))
+    date = Column(fields.DateTime)
     results = relation('Result', backref='revision')
 
 

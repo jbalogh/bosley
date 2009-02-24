@@ -9,7 +9,8 @@ from werkzeug.routing import Map, Rule
 import settings
 
 
-logging.basicConfig(filename=settings.path('log'), level=logging.DEBUG)
+logging.basicConfig(filename=settings.path('log'), level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s:%(name)s:%(message)s')
 
 local = Local()
 local_manager = LocalManager([local])

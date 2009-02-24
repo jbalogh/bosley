@@ -84,7 +84,7 @@ def populate():
 
     oldest = session.query(Revision).order_by('date').first()
     if oldest is None:
-        commit = 'HEAD'
+        commit = vcs.repo.commits()[0].id
     else:
         commit = vcs.before(oldest.git_id).id
 
@@ -96,7 +96,7 @@ def populate():
             vcs.apply_testing_patch()
             test_commit(commit)
         finally:
-            vcs.reset('%s^' % commit)
+            vcs.reset('%s' % commit)
         log.debug('Finished %s' % commit)
         commit = vcs.before(commit).id
 

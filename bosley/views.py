@@ -12,14 +12,16 @@ def revision_list(request):
     revisions = session.query(Revision).all()
 
     for rev in revisions:
-        results = session.query(Result).filter(Result.revision == rev)
-        broken = results.filter(Result.broken == True).count()
+        results = session.query(Result).filter_by(revision=rev)
+
+        broken = results.filter_by(broken=True).count()
         failing = results.filter(Result.fails > 0).count()
+
         passes = results.value(func.sum(Result.passes))
         fails = results.value(func.sum(Result.fails))
-        total = passes + fails
-        revstats[rev] = {'broken': broken, 'failing': failing,
-                         'fails': fails, 'passes': passes, 'total': total}
+
+        revstats[rev] = {'broken': broken, 'failing': failing, 'fails': fails,
+                         'passes': passes, 'total': passes + fails}
 
     return render_template('revision_list.html', revisions=revisions,
                            revstats=revstats)

@@ -32,7 +32,7 @@ class ThreadedTester(Thread):
         self.session = get_session(wsgi=False)
         self.queue =queue
         self.rev = rev
-        super(Thread, self).__init__()
+        Thread.__init__(self)
 
     def run(self):
         while not self.queue.empty():

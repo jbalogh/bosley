@@ -8,6 +8,10 @@ class BrokenTest(Exception):
     pass
 
 
+class DiscoveryError(Exception):
+    pass
+
+
 def query(url):
     # Force XML parser so we're not forgiving on errors.  Exceptions induce
     # invalid output, so we want those caught and shown as an error.
@@ -19,7 +23,10 @@ def discover():
 
 
 def cases():
-    d = discover()
+    try:
+        d = discover()
+    except XMLSyntaxError:
+        raise DiscoveryError
     return [e.text for e in d('case')]
 
 

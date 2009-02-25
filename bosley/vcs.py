@@ -1,6 +1,7 @@
+import os
+import sys
 import logging
 import subprocess
-import sys
 from datetime import datetime
 
 import git
@@ -23,13 +24,14 @@ def info(head):
             'author': '%s' % c.author.name,
             'date': datetime(*c.committed_date[:7]),
             'git_id': c.id,
-            'svn_id': svn_id(head, c.id),
+            'svn_id': svn_id(head),
             }
 
 
-def svn_id(head, hash):
-    # gross.
-    cmd = 'git checkout -q %s && git svn info' % head
+def svn_id(git_id):
+    # Record the current position so we can jump back.  Gross.
+    head = open(os.path.join(settings.REPO, '.git', 'HEAD')).read()
+    cmd = 'git checkout -q %s && git svn info' % git_id
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True,
                          cwd=settings.REPO)
     out = p.communicate()[0].split()

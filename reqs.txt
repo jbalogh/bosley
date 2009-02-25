@@ -6,5 +6,4 @@ ipython==0.9.1
 lxml==2.2beta3
 pyflakes==0.3.0
 pyquery==0.3.1
-readline==2.5.1
 wsgiref==0.1.2

@@ -120,7 +120,7 @@ def update():
 
     vcs.checkout('master')
     vcs.rebase()
-    latest_recorded = session.query(revision).order_by('-date').first()
+    latest_recorded = session.query(Revision).order_by('-date').first()
     for commit in vcs.following(latest_recorded.git_id):
         handle(commit.id)
 

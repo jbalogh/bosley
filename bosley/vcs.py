@@ -31,11 +31,11 @@ def info(head):
 def svn_id(git_id):
     # Record the current position so we can jump back.  Gross.
     head = open(os.path.join(settings.REPO, '.git', 'HEAD')).read()
-    cmd = 'git checkout -q %s && git svn info' % git_id
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True,
+    checkout(git_id)
+    p = subprocess.Popen('git svn info', stdout=subprocess.PIPE, shell=True,
                          cwd=settings.REPO)
     out = p.communicate()[0].split()
-    call('git checkout -q %s' % head)
+    checkout(head)
     # Looks like "Revision: xxx", so grab the item after Revision.
     return out[1 + out.index('Revision:')]
 

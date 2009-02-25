@@ -1,15 +1,43 @@
 {% extends "base.html" %}
 
-{% block title %}Revision List{% endblock %}
+{% block extrahead %}
+  <!-- Hi snoopers! -->
+
+  <!-- I know, this needs a better home. -->
+  <style type="text/css">
+    .author, .message {
+      white-space: pre;
+      font-family: monospace;
+    }
+    .passing, .failing {
+      font-weight: bold;
+    }
+    .passing {
+      color: green;
+    }
+    .failing {
+      color: red;
+    }
+  </style>
+{% endblock %}
+
+
+{% block title %}Ghetto Buildbot{% endblock %}
 
 {% block content %}
   <dl>
     {% for revision in revisions %}
       {% set stats = revstats[revision] %}
-      <dt>{{ revision.rev }}</dt>
-      <dd>{{ stats['total'] }} tests: +{{ stats['passes'] }}, -{{ stats['fails'] }}</dd>
+      <dt>{{ revision.svn_id }} ({{ revision.git_id[:8] }})</dt>
+      <dd class="author">{{ revision.author }}</dd>
+      <dd class="message">{{ revision.message }}</dd>
+      <dd>{{ stats['total'] }} tests:
+          <span class="passing">+{{ stats['passes'] }}</span>
+          <span class="failing">-{{ stats['fails'] }}</span>
+      </dd>
       <dd>{{ stats['broken'] }} broken test cases,
-          {{ stats['failing'] }} failing test cases</dd>
+          {{ stats['failing'] }} failing.
+      </dd>
     {% endfor %}
   </dl>
 {% endblock %}

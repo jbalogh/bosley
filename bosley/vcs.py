@@ -33,6 +33,7 @@ def svn_id(head, hash):
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True,
                          cwd=settings.REPO)
     out = p.communicate()[0].split()
+    call('git checkout -q %s' % head)
     # Looks like "Revision: xxx", so grab the item after Revision.
     return out[1 + out.index('Revision:')]
 
@@ -59,7 +60,7 @@ def checkout(id):
 
 def apply_testing_patch():
     try:
-        call('git am %s' % settings.path('data/testing.patch'))
+        call('git am -q %s' % settings.path('data/testing.patch'))
     except CommandError, status:
         log.error('Failed to apply testing patch!')
         sys.exit(status)
@@ -67,7 +68,7 @@ def apply_testing_patch():
 
 def reset(id):
     try:
-        call('git reset --hard %s' % id)
+        call('git reset -q --hard %s' % id)
     except CommandError, status:
         log.error('Resetting failed!')
         sys.exit(status)

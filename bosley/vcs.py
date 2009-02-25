@@ -17,8 +17,10 @@ class CommandError(Exception):
 
 def info(head):
     c = repo.commits(head)[0]
-    return {'message': c.message,
-            'author': '%s <%s>' % (c.author.name, c.author.email),
+    # Only record up to the git-svn part, we don't want to see that.
+    git_svn_string = c.message.index('git-svn-id:')
+    return {'message': c.message[:git_svn_string],
+            'author': '%s' % c.author.name,
             'date': datetime(*c.committed_date[:7]),
             'git_id': c.id,
             'svn_id': svn_id(head, c.id),

@@ -1,3 +1,4 @@
+import sys
 import logging
 from Queue import Queue
 from threading import Thread
@@ -97,7 +98,8 @@ class ThreadedTester(Thread):
             return Result(case=case, broken=True)
 
 
-def populate():
+def backfill():
+    """Populate old test data: used for going backwards."""
     metadata.create_all(session.bind)
 
     oldest = session.query(Revision).order_by('date').first()
@@ -124,4 +126,14 @@ def update():
 
 
 if __name__ == '__main__':
-    populate()
+    def usage():
+        print "\tUsage: python %s (backfill|update)" % sys.argv[0]
+        sys.exit(1)
+    if len(sys.argv) != 2:
+        usage()
+    if sys.argv[1] == 'backfill':
+        backfill()
+    elif sys.argv[1] == 'update':
+        update()
+    else:
+        usage()

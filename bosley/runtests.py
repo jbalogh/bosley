@@ -13,6 +13,22 @@ session = get_session(wsgi=False)
 log = logging.getLogger(__file__)
 
 
+# Terrible name.
+def handle(commit):
+    """Setup the repo at commit and run the tests."""
+    log.debug('Processing %s' % commit)
+    try:
+        vcs.checkout(commit)
+        try:
+            remote.cases()
+        except remote.DiscoveryError:
+            vcs.apply_testing_patch()
+        test_commit(commit)
+    finally:
+        vcs.reset(commit)
+    log.debug('Finished %s' % commit)
+
+
 def test_commit(id):
     revdata = vcs.info(id)
     q = session.query(Revision)
@@ -92,14 +108,7 @@ def populate():
 
     # Process tests as far back as we can.  Eventually, something will fail.
     while True:
-        log.debug('Processing %s' % commit)
-        vcs.checkout(commit)
-        try:
-            vcs.apply_testing_patch()
-            test_commit(commit)
-        finally:
-            vcs.reset('%s' % commit)
-        log.debug('Finished %s' % commit)
+        handle(commit)
         commit = vcs.before(commit).id
 
 

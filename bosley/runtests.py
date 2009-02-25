@@ -112,5 +112,16 @@ def populate():
         commit = vcs.before(commit).id
 
 
+def update():
+    """Update test data to the latest revision: used for going forward."""
+    metadata.create_all(session.bind)
+
+    vcs.checkout('master')
+    vcs.rebase()
+    latest_recorded = session.query(revision).order_by('-date').first()
+    for commit in vcs.following(latest_recorded.git_id):
+        handle(commit.id)
+
+
 if __name__ == '__main__':
     populate()

@@ -44,6 +44,12 @@ def before(id):
     return repo.commits(id)[0].parents[0]
 
 
+def following(commit):
+    """Get the commits following `commit`, up to the latest in the repo."""
+    latest = r.commits()[0]
+    return r.commits_between(commit, latest)
+
+
 def call(cmd):
     status = subprocess.call(cmd, cwd=settings.REPO, shell=True)
     log.debug('call: %s: %s' % (status, cmd))
@@ -73,4 +79,12 @@ def reset(id):
         call('git reset -q --hard %s' % id)
     except CommandError, status:
         log.error('Resetting failed!')
+        sys.exit(status)
+
+
+def rebase():
+    try:
+        call('git svn rebase -q')
+    except CommandError, status:
+        log.error('Rebase failed!')
         sys.exit(status)

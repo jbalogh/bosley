@@ -59,7 +59,7 @@ def call(cmd):
 
 def checkout(id):
     try:
-        call('git checkout -q %s' % id)
+        call('git checkout  %s' % id)
     except CommandError, status:
         # The repo is in an unknown state, don't try to do anything.
         log.error('Bailing after failed checkout!')
@@ -68,7 +68,7 @@ def checkout(id):
 
 def apply_testing_patch():
     try:
-        call('git am -q %s' % settings.path('data/testing.patch'))
+        call('git am  %s' % settings.path('data/testing.patch'))
     except CommandError, status:
         log.error('Failed to apply testing patch!')
         sys.exit(status)
@@ -76,7 +76,7 @@ def apply_testing_patch():
 
 def reset(id):
     try:
-        call('git reset -q --hard %s' % id)
+        call('git reset  --hard %s' % id)
     except CommandError, status:
         log.error('Resetting failed!')
         sys.exit(status)
@@ -84,7 +84,7 @@ def reset(id):
 
 def rebase():
     try:
-        call('git svn rebase -q')
+        call('git svn rebase ')
     except CommandError, status:
         log.error('Rebase failed!')
         sys.exit(status)

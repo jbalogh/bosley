@@ -4,6 +4,7 @@ from Queue import Queue
 from threading import Thread
 
 import sqlalchemy.orm
+from sqlalchemy import desc
 
 import remote, vcs
 from models import Revision, Case, Result
@@ -102,7 +103,7 @@ def backfill():
     """Populate old test data: used for going backwards."""
     metadata.create_all(session.bind)
 
-    oldest = session.query(Revision).order_by('date').first()
+    oldest = session.query(Revision).order_by(Revision.date).first()
     if oldest is None:
         commit = vcs.repo.commits()[0].id
     else:
@@ -120,8 +121,8 @@ def update():
 
     vcs.checkout('master')
     vcs.rebase()
-    latest_recorded = session.query(Revision).order_by('-date').first()
-    for commit in vcs.following(latest_recorded.git_id):
+    latest_recorded = session.query(Revision).order_by(desc(Revision.date))
+    for commit in vcs.following(latest_recorded.first().git_id):
         handle(commit.id)
 
 

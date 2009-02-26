@@ -46,8 +46,8 @@ def before(id):
 
 def following(commit):
     """Get the commits following `commit`, up to the latest in the repo."""
-    latest = r.commits()[0]
-    return r.commits_between(commit, latest)
+    latest = repo.commits()[0]
+    return repo.commits_between(commit, latest)
 
 
 def call(cmd):

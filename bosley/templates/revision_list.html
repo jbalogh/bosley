@@ -28,7 +28,10 @@
   <dl>
     {% for revision in revisions %}
       {% set stats = revstats[revision] %}
-      <dt>{{ revision.svn_id }} ({{ revision.git_id[:8] }})</dt>
+      <dt>
+        <a href="{{ revision.svn_id  }}">{{ revision.svn_id }}</a>
+        ({{ revision.git_id[:8] }})
+      </dt>
       <dd class="author">{{ revision.author }}</dd>
       <dd class="message">{{ revision.message }}</dd>
       <dd>{{ stats['total'] }} tests:

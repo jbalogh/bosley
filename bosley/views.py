@@ -9,7 +9,7 @@ session = get_session(wsgi=True)
 @expose('/')
 def revision_list(request):
     revstats = {}
-    revisions = session.query(Revision).order_by(desc(Revision.date))
+    revisions = session.query(Revision).order_by(desc(Revision.date))[:25]
 
     for rev in revisions:
         results = session.query(Result).filter_by(revision=rev)

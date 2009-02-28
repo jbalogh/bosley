@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Results for r{{ revision.svn_id  }}{% endblock %}
+
+{% block extrahead %}
+  <!-- Hi snoopers! -->
+
+  <!-- I know, this needs a better home. -->
+  <style type="text/css">
+    .author, .message {
+      white-space: pre;
+      font-family: monospace;
+    }
+    .passing, .failing {
+      font-weight: bold;
+    }
+    .passing {
+      color: green;
+    }
+    .failing {
+      color: red;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <h1>r{{ revision.svn_id  }}</h1>
+  <h2>{{ revision.author  }}</h2>
+  <h3>{{ revision.date  }}</h3>
+  <p class="message">{{ revision.message  }}</p>
+  <p>
+    {{ stats['total'] }} tests:
+    <span class="passing">+{{ stats['passes'] }}</span>
+    <span class="failing">-{{ stats['fails'] }}</span>
+  </p>
+  <h4>Failing Tests</h4>
+  <ul>
+    {% for test in failing %}
+      <li>
+        {{ test.case.name  }} (<span class="failing">{{ test.fails  }}</span>)
+      </li>
+    {% endfor %}
+  </ul>
+  <h4>Broken Tests</h4>
+  <ul>
+    {% for test in broken %}
+      <li>{{ test.case.name  }}</li>
+    {% endfor %}
+  </ul>
+    
+{% endblock %}

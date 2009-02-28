@@ -10,8 +10,6 @@ import remote, vcs
 from models import Revision, Case, Result
 from utils import get_session, metadata
 
-session = get_session(wsgi=False)
-
 log = logging.getLogger(__file__)
 
 
@@ -32,6 +30,7 @@ def handle(commit):
 
 
 def test_commit(id):
+    session = get_session()
     revdata = vcs.info(id)
     q = session.query(Revision)
 
@@ -101,6 +100,7 @@ class ThreadedTester(Thread):
 
 def backfill():
     """Populate old test data: used for going backwards."""
+    session = get_session()
     metadata.create_all(session.bind)
 
     oldest = session.query(Revision).order_by(Revision.date).first()
@@ -117,6 +117,7 @@ def backfill():
 
 def update():
     """Update test data to the latest revision: used for going forward."""
+    session = get_session()
     metadata.create_all(session.bind)
 
     vcs.checkout('master')

@@ -19,7 +19,7 @@ class Case(Base, Model):
 
     id = Column(fields.Integer, primary_key=True)
     name = Column(fields.String(100))
-    results = relation('Result', backref='case')
+    results = relation('Result', backref='case', lazy='dynamic')
 
     def __repr__(self):
         return '<Case %s>' % self.name
@@ -36,7 +36,7 @@ class Revision(Base, Model):
     message = Column(fields.Text)
     author = Column(fields.String(100))
     date = Column(fields.DateTime)
-    results = relation('Result', backref='revision')
+    results = relation('Result', backref='revision', lazy='dynamic')
 
 
 class Result(Base, Model):

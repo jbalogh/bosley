@@ -27,16 +27,17 @@
 {% block content %}
   <dl>
     {% for revision in revisions %}
-      {% set stats = revstats[revision] %}
+      {% set stats = revision.stats() %}
       <dt>
         <a href="{{ revision.svn_id  }}">{{ revision.svn_id }}</a>
         ({{ revision.git_id[:8] }})
       </dt>
       <dd class="author">{{ revision.author }}</dd>
       <dd class="message">{{ revision.message }}</dd>
-      <dd>{{ stats['total'] }} tests:
-          <span class="passing">+{{ stats['passes'] }}</span>
-          <span class="failing">-{{ stats['fails'] }}</span>
+      <dd>
+        <span class="total">{{ stats['total'] }} tests:
+        <span class="passing">+{{ stats['passes'] }}</span>
+        <span class="failing">-{{ stats['fails'] }}</span>
       </dd>
       <dd>{{ stats['broken'] }} broken test cases,
           {{ stats['failing'] }} failing.

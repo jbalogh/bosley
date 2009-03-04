@@ -1,4 +1,4 @@
-from sqlalchemy import func, desc
+from sqlalchemy import func
 
 from models import Revision, Result
 from utils import expose, get_session, render_template
@@ -8,14 +8,8 @@ session = get_session(wsgi=True)
 
 @expose('/')
 def revision_list(request):
-    revstats = {}
-    revisions = session.query(Revision).order_by(desc(Revision.date))[:25]
-
-    for revision in revisions:
-        revstats[revision] = stats(session, revision)
-
-    return render_template('revision_list.html', revisions=revisions,
-                           revstats=revstats)
+    revisions = Revision.query.order_by(Revision.date.desc())[:25]
+    return render_template('revision_list.html', revisions=revisions)
 
 
 @expose('/<int:rev>')

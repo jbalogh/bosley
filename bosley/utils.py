@@ -31,6 +31,8 @@ def get_session(wsgi=False):
 def engine():
     return create_engine(settings.DATABASE, convert_unicode=True)
 
+Session = scoped_session(sessionmaker(bind=engine()))
+
 
 url_map = Map()
 def expose(rule, **kw):

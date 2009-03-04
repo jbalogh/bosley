@@ -57,6 +57,13 @@ class Revision(Base, Model):
     results = dynamic_loader('Result', backref='revision',
                              query_class=ResultQuery)
 
+    def stats(self):
+        results = self.results
+        passes, fails = results.sum_passes(), results.sum_fails()
+        return {'broken': results.broken().count(),
+                'failing': results.failing().count(),
+                'passes': passes, 'fails': fails, 'total': passes + fails}
+
 
 class Result(Base, Model):
     __tablename__ = 'results'

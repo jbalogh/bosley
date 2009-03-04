@@ -1,5 +1,5 @@
-from sqlalchemy import Column, ForeignKey, schema
-from sqlalchemy.orm import relation
+from sqlalchemy import Column, ForeignKey, schema, func
+from sqlalchemy.orm import dynamic_loader, Query
 from sqlalchemy.ext.declarative import declarative_base
 import sqlalchemy.types as fields
 
@@ -13,13 +13,31 @@ class Model(object):
     query = Session.query_property()
 
 
+class ResultQuery(Query):
+
+    def broken(self):
+        return self.filter_by(broken=True)
+
+    def failing(self):
+        return self.filter(Result.fails > 0)
+
+    def passing(self):
+        return self.filter(Result.passes == 0)
+
+    def sum_passes(self):
+        return self.value(func.sum(Result.passes))
+
+    def sum_fails(self):
+        return self.value(func.sum(Result.fails))
+
+
 class Case(Base, Model):
     __tablename__ = 'cases'
     __table_args__ = (schema.UniqueConstraint('name'), {})
 
     id = Column(fields.Integer, primary_key=True)
     name = Column(fields.String(100))
-    results = relation('Result', backref='case', lazy='dynamic')
+    results = dynamic_loader('Result', backref='case', query_class=ResultQuery)
 
     def __repr__(self):
         return '<Case %s>' % self.name
@@ -36,7 +54,8 @@ class Revision(Base, Model):
     message = Column(fields.Text)
     author = Column(fields.String(100))
     date = Column(fields.DateTime)
-    results = relation('Result', backref='revision', lazy='dynamic')
+    results = dynamic_loader('Result', backref='revision',
+                             query_class=ResultQuery)
 
 
 class Result(Base, Model):
@@ -50,6 +69,8 @@ class Result(Base, Model):
 
     case_id = Column(fields.Integer, ForeignKey('cases.id'))
     revision_id = Column(fields.Integer, ForeignKey('revisions.id'))
+
+    query = Session.query_property(ResultQuery)
 
     def __repr__(self):
         if self.broken:

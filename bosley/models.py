@@ -3,13 +3,17 @@ from sqlalchemy.orm import relation
 from sqlalchemy.ext.declarative import declarative_base
 import sqlalchemy.types as fields
 
-from utils import metadata
+from utils import metadata, Session
 
 
-Model = declarative_base(metadata=metadata)
+Base = declarative_base(metadata=metadata)
 
 
-class Case(Model):
+class Model(object):
+    query = Session.query_property()
+
+
+class Case(Base, Model):
     __tablename__ = 'cases'
     __table_args__ = (schema.UniqueConstraint('name'), {})
 
@@ -21,7 +25,7 @@ class Case(Model):
         return '<Case %s>' % self.name
 
 
-class Revision(Model):
+class Revision(Base, Model):
     # needs a date for non-numeric revision sorting
     __tablename__ = 'revisions'
     __table_args__ = (schema.UniqueConstraint('git_id'), {})
@@ -35,7 +39,7 @@ class Revision(Model):
     results = relation('Result', backref='revision')
 
 
-class Result(Model):
+class Result(Base, Model):
     __tablename__ = 'results'
     __table_args__ = (schema.UniqueConstraint('case_id', 'revision_id'), {})
 

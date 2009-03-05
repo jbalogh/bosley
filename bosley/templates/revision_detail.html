@@ -29,6 +29,7 @@
   <h3>{{ revision.date  }}</h3>
   <p class="message">{{ revision.message }}</p>
   <p id="stats">
+    {% set stats = revision.stats() %}
     {{ stats['total'] }} tests:
     <span class="passing">+{{ stats['passes'] }}</span>
     <span class="failing">-{{ stats['fails'] }}</span>

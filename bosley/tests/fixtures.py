@@ -2,7 +2,7 @@ from datetime import datetime
 
 import fixture
 
-from bosley.models import Result, Revision
+from bosley.models import Result, Revision, Case
 
 
 class RevisionData(fixture.DataSet):
@@ -22,6 +22,14 @@ class RevisionData(fixture.DataSet):
         date = datetime(2009, 03, 02)
 
 
+class CaseData(fixture.DataSet):
+
+    class failing:
+        name = 'failing case'
+
+    class broken:
+        name = 'broken case'
+
 class ResultData(fixture.DataSet):
 
     # Inheriting to get the revision object.
@@ -38,10 +46,12 @@ class ResultData(fixture.DataSet):
     class failing(passing1):
         passes = 7
         fails = 2
+        case = CaseData.failing
 
     class broken(passing1):
         broken = True
         passes = fails = 0
+        case = CaseData.broken
 
     class passing_r2(passing1):
         revision = RevisionData.r2
@@ -49,6 +59,6 @@ class ResultData(fixture.DataSet):
 
 class BaseCase(fixture.DataTestCase):
     fixture = fixture.SQLAlchemyFixture(
-        env={'ResultData': Result, 'RevisionData': Revision},
+        env={'ResultData': Result, 'RevisionData': Revision, 'CaseData': Case},
     )
-    datasets = [RevisionData, ResultData]
+    datasets = [RevisionData, ResultData, CaseData]

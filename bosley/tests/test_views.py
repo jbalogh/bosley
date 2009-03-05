@@ -1,4 +1,5 @@
 import re
+import functools
 from operator import attrgetter
 
 from pyquery import PyQuery
@@ -18,19 +19,27 @@ def render(template, **context):
 views.render_template = render
 
 
+def get(url, status_code=200, template_name=''):
+    def inner(f):
+        @functools.wraps(f)
+        def wrapper(self):
+            response = Client(Application(), BaseResponse).get(url)
+            assert response.status_code == status_code
+            if template_name:
+                assert response.template_name == template_name
+            f(self, response, response.template_context,
+              PyQuery(response.data))
+        return wrapper
+    return inner
+
+
 class TestViews(fixtures.BaseCase):
 
     def setup(self):
         self.client = Client(Application(), BaseResponse)
         fixtures.BaseCase.setUp(self)
 
-    def test_revision_list(self):
-        response = self.client.get('/')
-        assert response.status_code == 200
-        assert response.template_name == 'revision_list.html'
-
-        c = response.template_context
-        assert map(attrgetter('svn_id'), c['revisions']) == [2, 1]
-
-        d = PyQuery(response.data)
-        assert re.findall('(\d+) tests', d('.total').text()) == ['22', '44']
+    @get('/', template_name='revision_list.html')
+    def test_revision_list(self, response, context, dom):
+        assert map(attrgetter('svn_id'), context['revisions']) == [2, 1]
+        assert re.findall('(\d+) tests', dom('.total').text()) == ['22', '44']

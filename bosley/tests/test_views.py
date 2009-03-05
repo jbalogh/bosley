@@ -19,6 +19,7 @@ def render(template, **context):
 views.render_template = render
 
 
+# TODO: validate HTML
 def get(url, status_code=200, template_name=''):
     def inner(f):
         @functools.wraps(f)

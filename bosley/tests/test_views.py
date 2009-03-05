@@ -43,3 +43,12 @@ class TestViews(fixtures.BaseCase):
     def test_revision_list(self, response, context, dom):
         assert map(attrgetter('svn_id'), context['revisions']) == [2, 1]
         assert re.findall('(\d+) tests', dom('.total').text()) == ['22', '44']
+
+    @get('/1', template_name='revision_detail.html')
+    def test_revision_detail(self, response, context, d):
+        assert context['revision'].svn_id == 1
+        assert d('#stats').text() == '44 tests: +42 -2'
+        assert d('#failing').text() == 'failing case ( 2 )'
+        assert d('#broken').text() == 'broken case'
+
+

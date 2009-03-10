@@ -1,4 +1,5 @@
 import re
+import sys
 import functools
 from operator import attrgetter
 
@@ -7,7 +8,9 @@ from werkzeug import Client, BaseResponse
 
 from bosley import utils, views
 from bosley.application import Application
-from bosley.tests import fixtures
+
+import fixtures
+from multipart import post_multipart
 
 
 # Hijack render_template to store the name and context.
@@ -19,7 +22,6 @@ def render(template, **context):
 views.render_template = render
 
 
-# TODO: validate HTML
 def get(url, status_code=200, template_name=''):
     def inner(f):
         @functools.wraps(f)
@@ -30,6 +32,12 @@ def get(url, status_code=200, template_name=''):
                 assert response.template_name == template_name
             f(self, response, response.template_context,
               PyQuery(response.data))
+            # Validate after other tests so we know everything else works.
+            # Hacky piggybacking on --verbose so tests go faster.
+            if '--verbose' in sys.argv:
+                validator = post_multipart('validator.w3.org', '/check',
+                                           {'fragment': response.data})
+                assert PyQuery(validator)('#congrats').size() == 1
         return wrapper
     return inner
 
@@ -51,5 +59,3 @@ class TestViews(fixtures.BaseCase):
         assert d('#stats').text() == '44 tests: +42 -2'
         assert d('#failing').text() == 'failing case ( 2 )'
         assert d('#broken').text() == 'broken case'
-
-

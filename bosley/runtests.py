@@ -4,11 +4,10 @@ from Queue import Queue
 from threading import Thread
 
 import sqlalchemy.orm
-from sqlalchemy import desc
 
 import remote, vcs
 from models import Revision, Case, Result
-from utils import get_session, metadata
+from utils import get_session, metadata, Session
 
 log = logging.getLogger(__file__)
 
@@ -117,12 +116,11 @@ def backfill():
 
 def update():
     """Update test data to the latest revision: used for going forward."""
-    session = get_session()
-    metadata.create_all(session.bind)
+    metadata.create_all(Session.bind)
 
     vcs.checkout('master')
     vcs.rebase()
-    latest_recorded = session.query(Revision).order_by(desc(Revision.date))
+    latest_recorded = Revision.query.order_by(Revision.date.desc())
     for commit in vcs.following(latest_recorded.first().git_id):
         handle(commit.id)
 

@@ -127,15 +127,15 @@ def update():
         handle(commit.id)
 
 
-if __name__ == '__main__':
-    def usage():
+def main():
+    commands = {'backfill': backfill, 'update': update}
+
+    if len(sys.argv) != 2 or sys.argv[1] not in commands:
         print "\tUsage: python %s (backfill|update)" % sys.argv[0]
         sys.exit(1)
-    if len(sys.argv) != 2:
-        usage()
-    if sys.argv[1] == 'backfill':
-        backfill()
-    elif sys.argv[1] == 'update':
-        update()
-    else:
-        usage()
+
+    commands[sys.argv[1]]()
+
+
+if __name__ == '__main__':
+    main()

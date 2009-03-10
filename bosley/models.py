@@ -21,9 +21,6 @@ class ResultQuery(Query):
     def failing(self):
         return self.filter(Result.fails > 0)
 
-    def passing(self):
-        return self.filter(Result.passes == 0)
-
     def sum_passes(self):
         return self.value(func.sum(Result.passes))
 
@@ -78,10 +75,3 @@ class Result(Base, Model):
     revision_id = Column(fields.Integer, ForeignKey('revisions.id'))
 
     query = Session.query_property(ResultQuery)
-
-    def __repr__(self):
-        if self.broken:
-            status = 'BROKEN'
-        else:
-            status = '(%s, %s)' % (self.passes, self.fails)
-        return '<%s %s>' % (self.case, status)

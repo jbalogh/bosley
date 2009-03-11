@@ -99,19 +99,21 @@ class ThreadedTester(Thread):
 
 def backfill():
     """Populate old test data: used for going backwards."""
-    session = get_session()
-    metadata.create_all(session.bind)
+    metadata.create_all(Session.bind)
 
-    oldest = session.query(Revision).order_by(Revision.date).first()
+    oldest = Revision.query.order_by(Revision.date.asc()).first()
     if oldest is None:
-        commit = vcs.repo.commits()[0].id
+        commit = vcs.repo.commits()[0]
     else:
-        commit = vcs.before(oldest.git_id).id
+        commit = vcs.before(oldest.git_id)
 
     # Process tests as far back as we can.  Eventually, something will fail.
-    while True:
-        handle(commit)
-        commit = vcs.before(commit).id
+    def generator(commit):
+        while True:
+            yield commit
+            commit = vcs.before(commit)
+
+    process_commits(generator(commit))
 
 
 def update():
@@ -121,7 +123,12 @@ def update():
     vcs.checkout('master')
     vcs.rebase()
     latest_recorded = Revision.query.order_by(Revision.date.desc())
-    for commit in vcs.following(latest_recorded.first().git_id):
+
+    process_commits(vcs.following(latest_recorded.first().git_id))
+
+
+def process_commits(commits):
+    for commit in commits:
         handle(commit.id)
 
 

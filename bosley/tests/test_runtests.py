@@ -5,7 +5,7 @@ from operator import itemgetter
 from mock import patch, Mock, sentinel
 from nose.tools import assert_raises
 
-from bosley import runtests
+from bosley import runtests, remote
 
 import fixtures
 
@@ -88,3 +88,32 @@ def test_main(backfill_mock, update_mock, exit_mock):
     assert_raises(SystemExit, runtests.main)
 
     sys.argv = _argv
+
+
+@patch('bosley.runtests.vcs')
+@patch('bosley.runtests.remote.cases')
+@patch('bosley.runtests.test_commit')
+def test_handle(vcs_mock, remote_mock, test_commit_mock):
+    commit = sentinel.Commit
+    runtests.handle(commit)
+
+    vcs_mock.checkout.assert_called_with(commit)
+    vcs_mock.reset.assert_called_with(commit)
+    assert methods(vcs_mock) == ['checkout', 'reset']
+
+    assert remote.cases.called
+    test_commit_mock.assert_called_with(commit)
+
+
+@patch('bosley.runtests.vcs')
+@patch('bosley.runtests.remote.cases')
+@patch('bosley.runtests.test_commit')
+def test_handle_error(vcs_mock, remote_mock, test_commit_mock):
+    def discovery_error():
+        raise remote.DiscoveryError
+    remote_mock.side_effect = discovery_error
+
+    commit = sentinel.Commit
+    runtests.handle(commit)
+
+    assert methods(vcs_mock) == ['checkout', 'apply_testing_patch', 'reset']

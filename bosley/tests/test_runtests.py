@@ -6,6 +6,7 @@ from mock import patch, Mock, sentinel
 from nose.tools import assert_raises
 
 from bosley import runtests, remote
+from bosley.models import Revision
 
 import fixtures
 
@@ -58,6 +59,21 @@ class TestCase(fixtures.BaseCase):
         generator = process_mock.call_args[0][0]
         assert generator.next() == sentinel.Commit
 
+    @patch('bosley.runtests.vcs.info')
+    @patch('bosley.runtests.test_revision')
+    def test_test_commit(self, info_mock, test_revision_mock):
+        git_id = '3' * 40
+        info_mock.return_value = {'git_id': git_id}
+        runtests.test_commit(sentinel.id)
+        assert Revision.query.filter_by(git_id=git_id).count() == 1
+
+    @patch('bosley.runtests.vcs.info')
+    @patch('bosley.runtests.test_revision')
+    def test_test_commit_existing(self, info_mock, test_revision_mock):
+        info_mock.return_value = {'git_id': '2' * 40}
+        runtests.test_commit(sentinel.id)
+        assert test_revision_mock.called is False
+
 
 @patch('bosley.runtests.backfill')
 @patch('bosley.runtests.update')
@@ -109,6 +125,7 @@ def test_handle(vcs_mock, remote_mock, test_commit_mock):
 @patch('bosley.runtests.remote.cases')
 @patch('bosley.runtests.test_commit')
 def test_handle_error(vcs_mock, remote_mock, test_commit_mock):
+
     def discovery_error():
         raise remote.DiscoveryError
     remote_mock.side_effect = discovery_error

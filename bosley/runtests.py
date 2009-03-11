@@ -29,17 +29,15 @@ def handle(commit):
 
 
 def test_commit(id):
-    session = get_session()
     revdata = vcs.info(id)
-    q = session.query(Revision)
 
-    if q.filter_by(git_id=revdata['git_id']).count() != 0:
+    if Revision.query.filter_by(git_id=revdata['git_id']).count() != 0:
         return
 
     revision = Revision(**revdata)
-    session.add(revision)
-    session.commit()
+    Revision.query.session.add(revision)
     # The object can't be shared across threads.
+    Revision.query.session.commit()
     test_revision(revision.id)
 
 

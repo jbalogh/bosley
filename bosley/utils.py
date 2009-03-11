@@ -43,8 +43,8 @@ def expose(rule, **kw):
     return decorate
 
 
-def url_for(endpoint, external=False, **values):
-    return local.url_adapter.build(endpoint, values, force_external=external)
+def url_for(endpoint, _external=False, **values):
+    return local.url_adapter.build(endpoint, values, force_external=_external)
 
 
 jinja_env = Environment(loader=FileSystemLoader(settings.TEMPLATE_PATH))

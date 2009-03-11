@@ -29,7 +29,9 @@
     {% for revision in revisions %}
       {% set stats = revision.stats() %}
       <dt>
-        <a href="{{ revision.svn_id  }}">{{ revision.svn_id }}</a>
+        <a href="{{ url_for('revision_detail', rev=revision.svn_id)  }}">
+          {{ revision.svn_id }}
+        </a>
         ({{ revision.git_id[:8] }})
       </dt>
       <dd class="author">{{ revision.author }}</dd>

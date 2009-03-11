@@ -52,7 +52,7 @@ class TestViews(fixtures.BaseCase):
     def test_revision_list(self, response, context, dom):
         assert map(attrgetter('svn_id'), context['revisions']) == [2, 1]
         assert re.findall('(\d+) tests', dom('.total').text()) == ['22', '44']
-        assert [e.attrib['href'] for e in dom('dt a')] == ['2', '1']
+        assert [e.attrib['href'] for e in dom('dt a')] == ['/2', '/1']
 
     @get('/1', template_name='revision_detail.html')
     def test_revision_detail(self, response, context, d):

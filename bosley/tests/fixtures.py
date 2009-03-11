@@ -3,6 +3,7 @@ from datetime import datetime
 import fixture
 
 # Need to be loaded so the fixture mapper can find them.
+from bosley import utils
 from bosley.models import Result, Revision, Case, TestFile, Test, Assertion
 
 
@@ -124,3 +125,8 @@ class BaseCase(fixture.DataTestCase):
     datasets = [RevisionData, ResultData, CaseData,
                 TestFileData, TestData, AssertionData,
                 ]
+
+    def setup(self):
+        utils.metadata.drop_all(utils.Session.bind)
+        utils.metadata.create_all(utils.Session.bind)
+        fixture.DataTestCase.setUp(self)

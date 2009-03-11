@@ -59,9 +59,68 @@ class ResultData(fixture.DataSet):
         revision = RevisionData.r2
 
 
+class TestFileData(fixture.DataSet):
+
+    class broken:
+        name = 'broken.tests'
+        broken = True
+        revision = RevisionData.r1
+
+    class database:
+        name = 'database.tests'
+        revision = RevisionData.r1
+
+
+class TestData(fixture.DataSet):
+
+    class testDefaults:
+        name = 'testDefaults'
+        testfile = TestFileData.database
+        revision = RevisionData.r1
+
+    class testPopulated(testDefaults):
+        name = 'testPopulated'
+
+    class testFallback(testDefaults):
+        name = 'testFallback'
+
+    class testNoErrors(testDefaults):
+        name = 'testNoErrors'
+
+
+class AssertionData(fixture.DataSet):
+
+    class default:
+        text = 'Default shadow db....'
+        fail = False
+        test = TestData.testDefaults
+        revision = RevisionData.r1
+
+    class populated(default):
+        text = 'Populated shadow db...'
+        test = TestData.testPopulated
+
+    class fallback(default):
+        text = 'Fallback to shadow...'
+        test = TestData.testFallback
+
+    class enabled(fallback):
+        text = 'Shadow databases are...'
+        fail = True
+
+    class disabled(fallback):
+        text = 'Disabled shadow databases...'
+
+    class noerror(default):
+        text = 'Should be no...'
+        test = TestData.testNoErrors
+
+
 class BaseCase(fixture.DataTestCase):
     fixture = fixture.SQLAlchemyFixture(
         env=globals(),
         style=fixture.TrimmedNameStyle(suffix="Data"),
     )
-    datasets = [RevisionData, ResultData, CaseData]
+    datasets = [RevisionData, ResultData, CaseData,
+                TestFileData, TestData, AssertionData,
+                ]

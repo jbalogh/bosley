@@ -2,7 +2,8 @@ from datetime import datetime
 
 import fixture
 
-from bosley.models import Result, Revision, Case
+# Need to be loaded so the fixture mapper can find them.
+from bosley.models import Result, Revision, Case, TestFile, Test, Assertion
 
 
 class RevisionData(fixture.DataSet):
@@ -29,6 +30,7 @@ class CaseData(fixture.DataSet):
 
     class broken:
         name = 'broken case'
+
 
 class ResultData(fixture.DataSet):
 
@@ -59,6 +61,7 @@ class ResultData(fixture.DataSet):
 
 class BaseCase(fixture.DataTestCase):
     fixture = fixture.SQLAlchemyFixture(
-        env={'ResultData': Result, 'RevisionData': Revision, 'CaseData': Case},
+        env=globals(),
+        style=fixture.TrimmedNameStyle(suffix="Data"),
     )
     datasets = [RevisionData, ResultData, CaseData]

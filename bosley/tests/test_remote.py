@@ -106,3 +106,28 @@ def test_cases(discover_mock):
 def test_analyze(test_mock):
     test_mock.return_value = PyQuery(testcase_xml)
     assert remote.analyze('bla') == (5, 1)
+
+
+@patch('bosley.remote.test')
+def test_analyze2(test_mock):
+    test_mock.return_value = PyQuery(testcase_xml)
+    expected = {'testDefaults': (['Default shadow db'], []),
+                'testPopulated': (['Populated shadow db'], []),
+                'testFallback': (['Fallback to shadow', 'Disabled shadow'],
+                                 ['Shadow databases']),
+                'testNoErrors': (['Should be no errors'], []),
+                }
+    actual = remote.analyze2('bla')
+    assert actual.keys() == expected.keys()
+    for name, (e_passing, e_failing) in expected.items():
+        a_passing, a_failing = actual[name]
+        for a, e in zip(a_passing, e_passing):
+            assert a.startswith(e)
+        for a, e in zip(a_failing, e_failing):
+            assert a.startswith(e)
+
+
+@patch('bosley.remote.test')
+def test_analyze2_error(test_mock):
+    test_mock.side_effect = syntax_error
+    assert_raises(remote.BrokenTest, remote.analyze2, 'case')

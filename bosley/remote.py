@@ -40,3 +40,15 @@ def analyze(case):
     except XMLSyntaxError:
         raise BrokenTest
     return d('pass').size(), d('fail').size()
+
+
+def analyze2(case):
+    try:
+        d = test(case)
+    except XMLSyntaxError:
+        raise BrokenTest
+    tests = {}
+    for name in d('test name'):
+        f = lambda tag: [e.text for e in name.itersiblings() if e.tag == tag]
+        tests[name.text] = f('pass'), f('fail')
+    return tests

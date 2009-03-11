@@ -10,6 +10,10 @@ from bosley import runtests
 import fixtures
 
 
+def methods(mock):
+    return map(itemgetter(0), mock.method_calls)
+
+
 class TestCase(fixtures.BaseCase):
 
     @patch('bosley.runtests.vcs')
@@ -21,9 +25,7 @@ class TestCase(fixtures.BaseCase):
 
         runtests.update()
 
-        methods = map(itemgetter(0), vcs_mock.method_calls)
-        assert methods == ['checkout', 'rebase', 'following']
-
+        assert methods(vcs_mock) == ['checkout', 'rebase', 'following']
         vcs_mock.following.assert_called_with('2' * 40)
 
         handle_mock.assert_called_with(3)

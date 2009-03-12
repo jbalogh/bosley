@@ -40,10 +40,19 @@ def test_commit(id):
     revdata['message'] = utils.force_unicode(revdata['message'])
     revdata['author'] = utils.force_unicode(revdata['author'])
     revision = Revision(**revdata)
-    Revision.query.session.add(revision)
-    # The object can't be shared across threads.
-    Revision.query.session.commit()
-    test_revision(revision.id)
+
+    session = Revision.query.session
+    session.add(revision)
+    session.commit()
+    try:
+        # The object can't be shared across threads.
+        test_revision(revision.id)
+    except:
+        for model in TestFile, Test, Assertion:
+            model.query.filter_by(revision=revision).delete()
+        session.delete(revision)
+        session.commit()
+        raise
 
 
 def test_revision(rev):

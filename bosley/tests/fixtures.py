@@ -77,6 +77,9 @@ class TestFileData(fixture.DataSet):
     class database_r2(database_r1):
         revision = RevisionData.r2
 
+    class config_r2(database_r2):
+        name = 'config.test'
+
 
 class TestData(fixture.DataSet):
 
@@ -95,6 +98,10 @@ class TestData(fixture.DataSet):
     class testFallback_r2(testFallback_r1):
         testfile = TestFileData.database_r2
         revision = RevisionData.r2
+
+    class testConfig_r2(testFallback_r2):
+        testfile = TestFileData.config_r2
+        name = 'testConfig'
 
 
 class AssertionData(fixture.DataSet):
@@ -121,6 +128,7 @@ class AssertionData(fixture.DataSet):
         revision = RevisionData.r2
 
     class fallback_r2(fallback_r1):
+        fail = True
         test = TestData.testFallback_r2
         revision = RevisionData.r2
 
@@ -130,6 +138,12 @@ class AssertionData(fixture.DataSet):
 
     class disabled_r2(disabled_r1):
         test = TestData.testFallback_r2
+        revision = RevisionData.r2
+
+    class config_r2:
+        text = u'Config bla bla...'
+        fail = True
+        test = TestData.testConfig_r2
         revision = RevisionData.r2
 
 

@@ -47,6 +47,8 @@ def analyze2(case):
         d = test(case)
     except XMLSyntaxError:
         raise BrokenTest
+    except:
+        raise BrokenTest
     tests = {}
     for name in d('test name'):
         f = lambda tag: [e.text for e in name.itersiblings() if e.tag == tag]

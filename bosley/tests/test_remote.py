@@ -84,3 +84,12 @@ def test_analyze2(test_mock):
 def test_analyze2_error(test_mock):
     test_mock.side_effect = syntax_error
     assert_raises(remote.BrokenTest, remote.analyze2, 'case')
+
+
+@patch('bosley.remote.test')
+def test_analyze2_unknown_error(test_mock):
+
+    def error():
+        raise Exception
+    test_mock.side_effect = error
+    assert_raises(remote.BrokenTest, remote.analyze2, 'case')

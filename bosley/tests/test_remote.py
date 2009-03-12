@@ -2,7 +2,7 @@ from pyquery import PyQuery
 from lxml.etree import XMLSyntaxError
 
 from nose.tools import assert_raises
-from mock import patch
+from mock import patch, Mock, sentinel
 
 from bosley import remote, settings
 
@@ -10,12 +10,15 @@ import fixtures
 
 
 @patch('bosley.remote.PyQuery')
-def test_query(pq_mock):
+@patch('bosley.remote.httplib2.Http.request')
+def test_query(pq_mock, request_mock):
+    request_mock.return_value = sentinel.response, sentinel.content
     url = 'foo'
-    remote.query('foo')
-    kwargs = pq_mock.call_args[1]
-    assert kwargs['parser'] == 'xml'
-    assert kwargs['url'] == settings.BASE + url
+
+    remote.query(url)
+
+    request_mock.assert_called_with(settings.BASE + url)
+    pq_mock.assert_called_with(sentinel.content, parser='xml')
 
 
 @patch('bosley.remote.query')

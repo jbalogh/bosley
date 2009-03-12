@@ -64,7 +64,9 @@ class TestCase(fixtures.BaseCase):
     @patch('bosley.runtests.test_revision')
     def test_test_commit(self, info_mock, test_revision_mock):
         git_id = '3' * 40
-        info_mock.return_value = {'git_id': git_id}
+        info_mock.return_value = {'git_id': git_id,
+                                  'message': u'I\xf1t\xebrn\xe2ti\xf4n\xe0l',
+                                  'author': u'\u03bcs\xeb\u044f'}
         runtests.test_commit(sentinel.id)
         assert Revision.query.filter_by(git_id=git_id).count() == 1
 

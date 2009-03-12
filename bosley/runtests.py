@@ -6,7 +6,9 @@ from threading import Thread
 
 import sqlalchemy.orm
 
-import remote, vcs
+import remote
+import utils
+import vcs
 from models import Revision, Case, Result, TestFile, Test, Assertion
 from utils import get_session, metadata, Session
 
@@ -35,6 +37,8 @@ def test_commit(id):
     if Revision.query.filter_by(git_id=revdata['git_id']).count() != 0:
         return
 
+    revdata['message'] = utils.force_unicode(revdata['message'])
+    revdata['author'] = utils.force_unicode(revdata['author'])
     revision = Revision(**revdata)
     Revision.query.session.add(revision)
     # The object can't be shared across threads.
@@ -119,7 +123,8 @@ class ThreadedTester2(Thread):
                 testfile.tests.append(test)
                 for assertion in itertools.chain(passing, failing):
                     test.assertions.append(
-                        Assertion(text=assertion, revision_id=self.rev,
+                        Assertion(text=utils.force_unicode(assertion),
+                                  revision_id=self.rev,
                                   fail=assertion not in passing)
                     )
         except remote.BrokenTest:

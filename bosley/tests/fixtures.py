@@ -12,15 +12,15 @@ class RevisionData(fixture.DataSet):
     class r1:
         svn_id = 1
         git_id = '1' * 40
-        message = 'bla'
-        author = 'jeff'
+        message = u'bla'
+        author = u'jeff'
         date = datetime(2009, 03, 01)
 
     class r2:
         svn_id = 2
         git_id = '2' * 40
-        message = 'foo'
-        author = 'fred'
+        message = u'foo'
+        author = u'fred'
         date = datetime(2009, 03, 02)
 
 
@@ -92,28 +92,28 @@ class TestData(fixture.DataSet):
 class AssertionData(fixture.DataSet):
 
     class default:
-        text = 'Default shadow db....'
+        text = u'Default shadow db....'
         fail = False
         test = TestData.testDefaults
         revision = RevisionData.r1
 
     class populated(default):
-        text = 'Populated shadow db...'
+        text = u'Populated shadow db...'
         test = TestData.testPopulated
 
     class fallback(default):
-        text = 'Fallback to shadow...'
+        text = u'Fallback to shadow...'
         test = TestData.testFallback
 
     class enabled(fallback):
-        text = 'Shadow databases are...'
+        text = u'Shadow databases are...'
         fail = True
 
     class disabled(fallback):
-        text = 'Disabled shadow databases...'
+        text = u'Disabled shadow databases...'
 
     class noerror(default):
-        text = 'Should be no...'
+        text = u'Should be no...'
         test = TestData.testNoErrors
 
 

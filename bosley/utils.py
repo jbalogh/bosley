@@ -54,3 +54,18 @@ jinja_env.globals['url_for'] = url_for
 def render_template(template, **context):
     return Response(jinja_env.get_template(template).render(**context),
                     mimetype='text/html')
+
+
+def force_unicode(s, encoding='utf-8', errors='strict'):
+    # Thanks Django.
+    if not isinstance(s, basestring):
+        if hasattr(s, '__unicode__'):
+            s = unicode(s)
+        else:
+            try:
+                s = unicode(str(s), encoding, errors)
+            except UnicodeEncodeError:
+                pass
+    elif not isinstance(s, unicode):
+        s = s.decode(encoding, errors)
+    return s

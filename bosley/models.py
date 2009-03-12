@@ -76,7 +76,7 @@ class Assertion(Base, Model):
 
     id = Column(fields.Integer, primary_key=True)
     fail = Column(fields.Boolean)
-    text = Column(fields.String(300))
+    text = Column(fields.Unicode(300))
 
     # Revision is denormalized to make queries easier.
     # TODO: write validator to make sure relations are correct.
@@ -93,8 +93,8 @@ class Revision(Base, Model):
     id = Column(fields.Integer, primary_key=True)
     svn_id = Column(fields.Integer)
     git_id = Column(fields.String(40))
-    message = Column(fields.Text)
-    author = Column(fields.String(100))
+    message = Column(fields.UnicodeText)
+    author = Column(fields.Unicode(100))
     date = Column(fields.DateTime)
     results = dynamic_loader('Result', backref='revision',
                              query_class=ResultQuery)

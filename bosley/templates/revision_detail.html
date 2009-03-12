@@ -29,24 +29,24 @@
   <h3>{{ revision.date  }}</h3>
   <p class="message">{{ revision.message }}</p>
   <p id="stats">
-    {% set stats = revision.stats() %}
+    {% set stats = revision.assertion_stats() %}
     {{ stats['total'] }} tests:
     <span class="passing">+{{ stats['passes'] }}</span>
     <span class="failing">-{{ stats['fails'] }}</span>
   </p>
   <h4>Failing Tests</h4>
   <ul id="failing">
-    {% for test in failing %}
+    {% for testfile, fail_count in failing %}
       <li>
-        {{ test.case.name  }} (<span class="failing">{{ test.fails  }}</span>)
+        {{ testfile.name  }} (<span class="failing">{{ fail_count }}</span>)
       </li>
     {% endfor %}
   </ul>
   <h4>Broken Tests</h4>
   <ul id="broken">
-    {% for test in broken %}
-      <li>{{ test.case.name  }}</li>
+    {% for testfile in broken %}
+      <li>{{ testfile.name  }}</li>
     {% endfor %}
   </ul>
-    
+
 {% endblock %}

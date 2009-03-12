@@ -2,11 +2,12 @@ import itertools
 import sys
 from operator import itemgetter
 
+from pyquery import PyQuery
 from mock import patch, Mock, sentinel
 from nose.tools import assert_raises
 
 from bosley import runtests, remote
-from bosley.models import Revision
+from bosley.models import Revision, TestFile, Assertion, Test
 
 import fixtures
 
@@ -73,6 +74,52 @@ class TestCase(fixtures.BaseCase):
         info_mock.return_value = {'git_id': '2' * 40}
         runtests.test_commit(sentinel.id)
         assert test_revision_mock.called is False
+
+    @patch('bosley.runtests.log')
+    def test_run(self, log_mock):
+        queue_mock = Mock()
+        queue = [True, False]
+        queue_mock.empty = queue.pop
+
+        testfile_name = 'testfile'
+        queue_mock.get.return_value = testfile_name
+
+        tester = runtests.ThreadedTester2(queue_mock, 5)
+        tester.test = Mock()
+
+        tester.run()
+
+        assert TestFile.query.filter_by(name=testfile_name).count() == 1
+
+    @patch('bosley.remote.test')
+    def test_test_runner(self, test_mock):
+        testfile = Mock()
+        testfile.tests = []
+        test_mock.return_value = PyQuery(fixtures.testcase_xml)
+
+        tester = runtests.ThreadedTester2(Mock(), 5)
+        tester.test(testfile)
+
+        names = 'testFallback testNoErrors testDefaults testPopulated'.split()
+        assert [t.name for t in testfile.tests] == names
+
+        q = Assertion.query
+        assert q.count() == 6
+        assert q.filter_by(fail=True).count() == 1
+        assert q.join(Test).filter(Test.name == 'testFallback').count() == 3
+
+    @patch('bosley.runtests.remote.analyze2')
+    def test_test_runner_error(self, analyze_mock):
+
+        def broken_test():
+            raise remote.BrokenTest
+        analyze_mock.side_effect = broken_test
+
+        testfile = Mock()
+        tester = runtests.ThreadedTester2(Mock(), Mock())
+        tester.test(testfile)
+
+        assert testfile.broken is True
 
 
 @patch('bosley.runtests.backfill')

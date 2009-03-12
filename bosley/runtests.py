@@ -1,12 +1,13 @@
 import sys
 import logging
+import itertools
 from Queue import Queue
 from threading import Thread
 
 import sqlalchemy.orm
 
 import remote, vcs
-from models import Revision, Case, Result
+from models import Revision, Case, Result, TestFile, Test, Assertion
 from utils import get_session, metadata, Session
 
 log = logging.getLogger(__file__)
@@ -93,6 +94,36 @@ class ThreadedTester(Thread):
             return Result(case=case, passes=passes, fails=fails)
         except remote.BrokenTest:
             return Result(case=case, broken=True)
+
+
+class ThreadedTester2(Thread):
+
+    def __init__(self, queue, rev):
+        self.queue, self.rev = queue, rev
+        Thread.__init__(self)
+
+    def run(self):
+        while not self.queue.empty():
+            testfile = TestFile(name=self.queue.get(), revision_id=self.rev)
+            log.debug('%s: Testing %s...' % (self.getName(), testfile.name))
+            self.test(testfile)
+            TestFile.query.session.add(testfile)
+            TestFile.query.session.commit()
+            log.debug('%s: Finished %s' % (self.getName(), testfile.name))
+
+    def test(self, testfile):
+        try:
+            results = remote.analyze2(testfile.name)
+            for test_name, (passing, failing) in results.items():
+                test = Test(name=test_name, revision_id=self.rev)
+                testfile.tests.append(test)
+                for assertion in itertools.chain(passing, failing):
+                    test.assertions.append(
+                        Assertion(text=assertion, revision_id=self.rev,
+                                  fail=assertion not in passing)
+                    )
+        except remote.BrokenTest:
+            testfile.broken = True
 
 
 def backfill():

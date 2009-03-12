@@ -1,13 +1,19 @@
-GitPython==0.1.6
 Jinja==1.2
 SQLAlchemy==0.5.2
 Werkzeug==0.4.1
-fixture==1.1.2
-ipython==0.9.1
-lxml==2.2beta3
-nose==0.10.4
-pyflakes==0.3.0
-pyquery==0.3.1
 wsgiref==0.1.2
+
+lxml==2.2beta3
+pyquery==0.3.1
+GitPython==0.1.6
+httplib2==0.4.0
+
+ipython==0.9.1
+nose==0.10.4
+coverage==2.85
+fixture==1.1.2
+mock==0.4.0
+pyflakes==0.3.0
+
 -e git://github.com/jbalogh/python-irclib.git#egg=python_irclib
 -e git://github.com/jbalogh/check.git#egg=check

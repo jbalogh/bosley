@@ -62,59 +62,75 @@ class ResultData(fixture.DataSet):
 
 class TestFileData(fixture.DataSet):
 
-    class broken:
+    class broken_r1:
         name = 'broken.tests'
         broken = True
         revision = RevisionData.r1
 
-    class database:
+    class database_r1:
         name = 'database.tests'
         revision = RevisionData.r1
+
+    class broken_r2(broken_r1):
+        revision = RevisionData.r2
+
+    class database_r2(database_r1):
+        revision = RevisionData.r2
 
 
 class TestData(fixture.DataSet):
 
-    class testDefaults:
+    class testDefaults_r1:
         name = 'testDefaults'
-        testfile = TestFileData.database
+        testfile = TestFileData.database_r1
         revision = RevisionData.r1
 
-    class testPopulated(testDefaults):
-        name = 'testPopulated'
-
-    class testFallback(testDefaults):
+    class testFallback_r1(testDefaults_r1):
         name = 'testFallback'
 
-    class testNoErrors(testDefaults):
-        name = 'testNoErrors'
+    class testDefaults_r2(testDefaults_r1):
+        testfile = TestFileData.database_r2
+        revision = RevisionData.r2
+
+    class testFallback_r2(testFallback_r1):
+        testfile = TestFileData.database_r2
+        revision = RevisionData.r2
 
 
 class AssertionData(fixture.DataSet):
 
-    class default:
+    class default_r1:
         text = u'Default shadow db....'
         fail = False
-        test = TestData.testDefaults
+        test = TestData.testDefaults_r1
         revision = RevisionData.r1
 
-    class populated(default):
-        text = u'Populated shadow db...'
-        test = TestData.testPopulated
-
-    class fallback(default):
+    class fallback_r1(default_r1):
         text = u'Fallback to shadow...'
-        test = TestData.testFallback
+        test = TestData.testFallback_r1
 
-    class enabled(fallback):
+    class enabled_r1(fallback_r1):
         text = u'Shadow databases are...'
         fail = True
 
-    class disabled(fallback):
+    class disabled_r1(fallback_r1):
         text = u'Disabled shadow databases...'
 
-    class noerror(default):
-        text = u'Should be no...'
-        test = TestData.testNoErrors
+    class default_r2(default_r1):
+        test = TestData.testDefaults_r2
+        revision = RevisionData.r2
+
+    class fallback_r2(fallback_r1):
+        test = TestData.testFallback_r2
+        revision = RevisionData.r2
+
+    class enabled_r2(enabled_r1):
+        test = TestData.testFallback_r2
+        revision = RevisionData.r2
+
+    class disabled_r2(disabled_r1):
+        test = TestData.testFallback_r2
+        revision = RevisionData.r2
 
 
 class BaseCase(fixture.DataTestCase):

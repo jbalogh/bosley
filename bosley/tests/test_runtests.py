@@ -105,8 +105,8 @@ class TestCase(fixtures.BaseCase):
         names = 'testFallback testNoErrors testDefaults testPopulated'.split()
         assert [t.name for t in testfile.tests] == names
 
-        q = Assertion.query
-        assert q.count() == 6
+        q = Assertion.query.filter_by(revision_id=self.data.RevisionData.r1.id)
+        assert q.count() == 4
         assert q.filter_by(fail=True).count() == 1
         assert q.join(Test).filter(Test.name == 'testFallback').count() == 3
 

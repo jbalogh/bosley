@@ -130,3 +130,51 @@ class BaseCase(fixture.DataTestCase):
         utils.metadata.drop_all(utils.Session.bind)
         utils.metadata.create_all(utils.Session.bind)
         fixture.DataTestCase.setUp(self)
+
+
+testcase_xml = """
+<?xml version="1.0"?>
+<run>
+  <group size="2">
+    <name>Test Case: database.test.php</name>
+    <group size="1">
+      <name>/bot/amo/site/app/tests/database.test.php</name>
+      <case>
+        <name>DatabaseTest</name>
+        <test>
+          <name>testDefaults</name>
+          <pass>Default shadow db config does not cause SHADOW constants to be set at [/bot/amo/site/app/tests/database.test.php line 79]</pass>
+        </test>
+        <test>
+          <name>testPopulated</name>
+          <pass>Populated shadow db config returns 1 database at [/bot/amo/site/app/tests/database.test.php line 85]</pass>
+        </test>
+        <test>
+          <name>testFallback</name>
+          <pass>Fallback to shadow database 2 when shadow database 1 is down at [/bot/amo/site/app/tests/database.test.php line 109]</pass>
+          <fail>Shadow databases are still enabled at [/bot/amo/site/app/tests/database.test.php line 110]</fail>
+          <pass>Disabled shadow databases because all shadows are down at [/bot/amo/site/app/tests/database.test.php line 124]</pass>
+        </test>
+      </case>
+    </group>
+    <group size="1">
+      <name>/bot/amo/site/app/tests/global.test.php</name>
+      <case>
+        <name>GlobalTest</name>
+        <test>
+          <name>testNoErrors</name>
+          <pass>Should be no errors at [/bot/amo/site/app/tests/global.test.php line 46]</pass>
+        </test>
+      </case>
+    </group>
+  </group>
+</run>
+"""
+
+discover_xml = """
+<?xml version="1.0" ?>
+<cases>
+  <case>app_controller.test.php</case>
+  <case>controllers/addons_controller.test.php</case>
+</cases>
+"""

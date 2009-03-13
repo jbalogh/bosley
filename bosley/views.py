@@ -14,9 +14,8 @@ def revision_list(request):
 def revision_detail(request, rev):
     revision = Revision.query.filter_by(svn_id=rev).one()
     testfiles = revision.testfiles
-    q = testfiles.join(Test).join(Assertion).filter(Assertion.fail == True)
     fail_count = func.count(Assertion.fail)
-    failing = q.group_by(TestFile.id).add_column(fail_count)
+    failing = testfiles.failing().group_by(TestFile.id).add_column(fail_count)
     return render_template('revision_detail.html',
                            revision=revision,
                            failing=failing.order_by(fail_count.desc()),

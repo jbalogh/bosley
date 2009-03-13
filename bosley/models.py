@@ -1,5 +1,5 @@
 from sqlalchemy import Column, ForeignKey, schema
-from sqlalchemy.orm import dynamic_loader
+from sqlalchemy.orm import dynamic_loader, Query
 from sqlalchemy.ext.declarative import declarative_base
 import sqlalchemy.types as fields
 
@@ -13,6 +13,35 @@ class Model(object):
     query = Session.query_property()
 
 
+class TestFileQuery(Query):
+
+    def failing(self):
+        q = self.join(Test).join(Assertion)
+        return q.filter(Assertion.fail == True).distinct()
+
+    def passing(self):
+        q = self.join(Test).join(Assertion)
+        return q.filter(Assertion.fail == False).distinct()
+
+
+class TestQuery(Query):
+
+    def failing(self):
+        return self.join(Assertion).filter(Assertion.fail == True).distinct()
+
+    def passing(self):
+        return self.join(Assertion).filter(Assertion.fail == False).distinct()
+
+
+class AssertionQuery(Query):
+
+    def failing(self):
+        return self.filter(Assertion.fail == True)
+
+    def passing(self):
+        return self.filter(Assertion.fail == False)
+
+
 class TestFile(Base, Model):
     """A TestFile has many tests and belongs to a Revision."""
     __tablename__ = 'testfiles'
@@ -23,7 +52,9 @@ class TestFile(Base, Model):
     broken = Column(fields.Boolean, default=False)
 
     revision_id = Column(fields.Integer, ForeignKey('revisions.id'))
-    tests = dynamic_loader('Test', backref='testfile')
+    tests = dynamic_loader('Test', backref='testfile', query_class=TestQuery)
+
+    query = Session.query_property(TestFileQuery)
 
 
 class Test(Base, Model):
@@ -40,7 +71,10 @@ class Test(Base, Model):
     # TODO: write validator to make sure relations are correct.
     testfile_id = Column(fields.Integer, ForeignKey('testfiles.id'))
     revision_id = Column(fields.Integer, ForeignKey('revisions.id'))
-    assertions = dynamic_loader('Assertion', backref='test')
+    assertions = dynamic_loader('Assertion', backref='test',
+                                query_class=AssertionQuery)
+
+    query = Session.query_property(TestQuery)
 
 
 class Assertion(Base, Model):
@@ -56,6 +90,8 @@ class Assertion(Base, Model):
     test_id = Column(fields.Integer, ForeignKey('tests.id'))
     revision_id = Column(fields.Integer, ForeignKey('revisions.id'))
 
+    query = Session.query_property(AssertionQuery)
+
 
 class Revision(Base, Model):
     """A single revision in version control."""
@@ -70,15 +106,16 @@ class Revision(Base, Model):
     author = Column(fields.Unicode(100))
     date = Column(fields.DateTime)
 
-    tests = dynamic_loader('Test', backref='revision')
-    testfiles = dynamic_loader('TestFile', backref='revision')
-    assertions = dynamic_loader('Assertion', backref='revision')
+    tests = dynamic_loader('Test', backref='revision',
+                           query_class=TestQuery)
+    testfiles = dynamic_loader('TestFile', backref='revision',
+                               query_class=TestFileQuery)
+    assertions = dynamic_loader('Assertion', backref='revision',
+                                query_class=AssertionQuery)
 
     def assertion_stats(self):
-        passes = self.assertions.filter_by(fail=False).count()
-        fails = self.assertions.filter_by(fail=True).count()
+        passes = self.assertions.passing().count()
+        fails = self.assertions.failing().count()
         return {'broken': self.testfiles.filter_by(broken=True).count(),
-                'failing': self.testfiles.join(Test).join(Assertion)\
-                               .filter(Assertion.fail == True)\
-                               .distinct().count(),
+                'failing': self.testfiles.failing().count(),
                 'passes': passes, 'fails': fails, 'total': passes + fails}

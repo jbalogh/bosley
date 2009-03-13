@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from bosley.models import Revision, Assertion
+from bosley.models import Revision, Assertion, TestFile
 from bosley.tests import fixtures
 
 
@@ -33,3 +33,12 @@ class TestAssertionModel(fixtures.BaseCase):
         a = Assertion(text=u'αβγδεζηθικλμνξ')
         session.add(a)
         session.commit()
+
+
+class TestQueries(fixtures.BaseCase):
+
+    def test_failing(self):
+        t = TestFile.query.get(self.data.TestFileData.database_r2.id)
+        failing = t.tests.failing()
+        assert failing.count() == 1
+        assert failing.value('name') == self.data.TestData.testFallback_r2.name

@@ -29,8 +29,7 @@ def status(bot):
 def st():
     q = Revision.query.order_by(Revision.date.desc())
     def counts(x):
-        passing = Assertion.fail == False
-        return x.filter(passing).count(), x.filter(~passing).count()
+        return x.passing().count(), x.failing().count()
     a, b = [Assertion.query.filter_by(revision=r) for r in q[:2]]
     passing, failing = map(operator.sub, counts(a), counts(b))
     return q.first(), passing, failing

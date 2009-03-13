@@ -1,8 +1,10 @@
+from __future__ import with_statement
+
 import sys
 import logging
 import itertools
+import threading
 from Queue import Queue
-from threading import Thread
 
 import remote
 import utils
@@ -11,6 +13,8 @@ from models import Revision, TestFile, Test, Assertion
 from utils import metadata, Session
 
 log = logging.getLogger(__file__)
+
+CommitLock = threading.Lock()
 
 
 def handle(commit):
@@ -40,7 +44,8 @@ def test_commit(id):
 
     session = Revision.query.session
     session.add(revision)
-    session.commit()
+    with CommitLock:
+        session.commit()
     try:
         # The object can't be shared across threads.
         test_revision(revision.id)
@@ -48,7 +53,8 @@ def test_commit(id):
         for model in TestFile, Test, Assertion:
             model.query.filter_by(revision=revision).delete()
         session.delete(revision)
-        session.commit()
+        with CommitLock:
+            session.commit()
         raise
 
 
@@ -72,11 +78,11 @@ def test_revision(rev):
         t.join()
 
 
-class ThreadedTester2(Thread):
+class ThreadedTester2(threading.Thread):
 
     def __init__(self, queue, rev):
         self.queue, self.rev = queue, rev
-        Thread.__init__(self)
+        threading.Thread.__init__(self)
 
     def run(self):
         while not self.queue.empty():
@@ -84,7 +90,8 @@ class ThreadedTester2(Thread):
             log.debug('%s: Testing %s...' % (self.getName(), testfile.name))
             self.test(testfile)
             TestFile.query.session.add(testfile)
-            TestFile.query.session.commit()
+            with CommitLock:
+                TestFile.query.session.commit()
             log.debug('%s: Finished %s' % (self.getName(), testfile.name))
 
     def test(self, testfile):

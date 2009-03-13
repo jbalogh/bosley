@@ -1,19 +1,16 @@
 import operator
 import threading
 
-from sqlalchemy import desc, func
 import pyquery
 
 import irc
-import views
 import runtests
-from models import Revision, Result
-from utils import get_session
+from models import Revision, Assertion
 
 
 @irc.Bot.cron(60)
 def updater(bot):
-    q = get_session().query(Revision).order_by(desc(Revision.date))
+    q = Revision.query.order_by(Revision.date.desc())
     latest = q.first()
     runtests.update()
     if latest.id != q.first().id:
@@ -30,14 +27,13 @@ def status(bot):
 
 
 def st():
-    session = get_session()
-    q = session.query(Revision).order_by(desc(Revision.date))
-    a, b = [session.query(Result).filter_by(revision=r) for r in q[:2]]
-    stats = func.sum(Result.passes), func.sum(Result.fails)
-    passing, failing = map(operator.sub, a.values(*stats).next(),
-                           b.values(*stats).next())
-    rev = session.query(Revision).order_by(desc(Revision.date)).first()
-    return rev, passing, failing
+    q = Revision.query.order_by(Revision.date.desc())
+    def counts(x):
+        passing = Assertion.fail == False
+        return x.filter(passing).count(), x.filter(~passing).count()
+    a, b = [Assertion.query.filter_by(revision=r) for r in q[:2]]
+    passing, failing = map(operator.sub, counts(a), counts(b))
+    return q.first(), passing, failing
 
 
 @irc.Bot.command
@@ -57,9 +53,8 @@ def wtf(bot):
 
 @irc.Bot.command
 def report(bot):
-    session = get_session()
-    q = session.query(Revision).order_by(desc(Revision.date))
-    stats = views.stats(session, q.first())
+    rev = Revision.query.order_by(Revision.date.desc()).first()
+    stats = rev.assertion_stats()
     bot.say('%d tests: +%d -%d' %
             (stats['total'], stats['passes'], stats['fails']))
     bot.say('%d broken test files, %d failing' %

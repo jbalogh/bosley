@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Results for r{{ revision.svn_id  }}{% endblock %}
+{% block title %}Results for r{{ revision.svn_id }}{% endblock %}
 
 {% block extrahead %}
   <link rel="stylesheet" type="text/css"
@@ -8,9 +8,9 @@
 {% endblock %}
 
 {% block content %}
-  <h1>r{{ revision.svn_id  }}</h1>
-  <h2>{{ revision.author  }}</h2>
-  <h3>{{ revision.date  }}</h3>
+  <h1>r{{ revision.svn_id }}</h1>
+  <h2>{{ revision.author }}</h2>
+  <h3>{{ revision.date }}</h3>
   <p class="message">{{ revision.message }}</p>
   <p id="stats">
     {% set stats = revision.assertion_stats() %}
@@ -30,7 +30,7 @@
               <span class="test">{{ test.name }}</span>
               <ul class="assertions">
                 {% for fail in test.assertions.failing() %}
-                  <li class="assertion">{{ fail.text|e }}</li>
+                  <li class="assertion">{{ fail.text }}</li>
                 {% endfor %}
               </ul>
             </li>
@@ -42,7 +42,7 @@
   <h4>Broken Tests</h4>
   <ul id="broken">
     {% for testfile in broken %}
-      <li>{{ testfile.name  }}</li>
+      <li>{{ testfile.name }}</li>
     {% endfor %}
   </ul>
 

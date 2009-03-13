@@ -13,7 +13,7 @@
     {% for revision in revisions %}
       {% set stats = revision.assertion_stats() %}
       <dt>
-        <a href="{{ url_for('revision_detail', rev=revision.svn_id)  }}">
+        <a href="{{ url_for('revision_detail', rev=revision.svn_id) }}">
           {{ revision.svn_id }}
         </a>
         ({{ revision.git_id[:8] }})

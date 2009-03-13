@@ -83,7 +83,7 @@ class Assertion(Base, Model):
 
     id = Column(fields.Integer, primary_key=True)
     fail = Column(fields.Boolean)
-    text = Column(fields.Unicode(300))
+    text = Column(fields.UnicodeText)
 
     # Revision is denormalized to make queries easier.
     # TODO: write validator to make sure relations are correct.

@@ -18,5 +18,5 @@ def revision_detail(request, rev):
     failing = testfiles.failing().group_by(TestFile.id).add_column(fail_count)
     return render_template('revision_detail.html',
                            revision=revision,
-                           failing=failing.order_by(fail_count.desc()),
+                           failing=failing.order_by(fail_count.asc()),
                            broken=testfiles.filter_by(broken=True))

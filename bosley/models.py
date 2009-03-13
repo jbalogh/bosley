@@ -79,5 +79,6 @@ class Revision(Base, Model):
         fails = self.assertions.filter_by(fail=True).count()
         return {'broken': self.testfiles.filter_by(broken=True).count(),
                 'failing': self.testfiles.join(Test).join(Assertion)\
-                               .filter(Assertion.fail == True).count(),
+                               .filter(Assertion.fail == True)\
+                               .distinct().count(),
                 'passes': passes, 'fails': fails, 'total': passes + fails}

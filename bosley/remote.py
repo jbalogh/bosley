@@ -29,7 +29,7 @@ def discover():
 def cases():
     try:
         d = discover()
-    except XMLSyntaxError:
+    except (XMLSyntaxError, ValueError):
         raise DiscoveryError
     return [e.text for e in d('case')]
 

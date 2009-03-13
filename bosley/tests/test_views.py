@@ -65,5 +65,12 @@ class TestViews(fixtures.BaseCase):
     def test_revision_detail(self, response, context, d):
         assert context['revision'].svn_id == 2
         assert d('#stats').text() == '5 tests: +2 -3'
-        assert equiv(d('#failing').text(), 'database.tests (2) config.test (1)')
         assert d('#broken').text() == 'broken.tests'
+        assert d('.test').text() == 'testFallback testConfig'
+        assert (d('.assertions').text() == 'Shadow databases are... '
+                'Fallback to shadow... Config bla bla...')
+        text = """
+        database.tests ( 2 ) testFallback Shadow databases are...
+        Fallback to shadow... config.test ( 1 ) testConfig Config bla bla...
+        """
+        assert equiv(d('#testfiles').text(), text)

@@ -35,10 +35,23 @@
     <span class="failing">-{{ stats['fails'] }}</span>
   </p>
   <h4>Failing Tests</h4>
-  <ul id="failing">
+  <ul id="testfiles">
     {% for testfile, fail_count in failing %}
       <li>
-        {{ testfile.name  }} (<span class="failing">{{ fail_count }}</span>)
+        <span class="testfile">{{ testfile.name }}</span>
+        (<span class="failing">{{ fail_count }}</span>)
+        <ul class="tests">
+          {% for test in testfile.tests.failing() %}
+            <li>
+              <span class="test">{{ test.name }}</span>
+              <ul class="assertions">
+                {% for fail in test.assertions.failing() %}
+                  <li class="assertion">{{ fail.text|e }}</li>
+                {% endfor %}
+              </ul>
+            </li>
+          {% endfor %}
+        </ul>
       </li>
     {% endfor %}
   </ul>

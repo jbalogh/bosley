@@ -23,7 +23,9 @@ Session = scoped_session(sessionmaker(bind=engine()))
 local = Local()
 local_manager = LocalManager([local])
 application = local('application')
-url_map = Map()
+url_map = Map([
+    Rule('/media/<file>', endpoint='media', build_only=True),
+])
 
 
 def expose(rule, **kw):

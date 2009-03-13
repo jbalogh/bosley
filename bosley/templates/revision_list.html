@@ -41,8 +41,9 @@
         <span class="passing">+{{ stats['passes'] }}</span>
         <span class="failing">-{{ stats['fails'] }}</span>
       </dd>
-      <dd>{{ stats['broken'] }} broken test cases,
-          {{ stats['failing'] }} failing.
+      <dd class="files">
+        {{ stats['failing'] }} failing test files,
+        {{ stats['broken'] }} broken.
       </dd>
     {% endfor %}
   </dl>

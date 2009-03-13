@@ -66,5 +66,5 @@ class TestPlugins(fixtures.BaseCase):
         bot_mock = Mock()
         plugins.report(bot_mock)
         calls = [args[0][0] for args in bot_mock.say.call_args_list]
-        assert calls == ['5 tests: +2 -3', '1 broken test files, 3 failing']
+        assert calls == ['5 tests: +2 -3', '2 failing test files, 1 broken']
 

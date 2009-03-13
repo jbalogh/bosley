@@ -57,8 +57,8 @@ def report(bot):
     stats = rev.assertion_stats()
     bot.say('%d tests: +%d -%d' %
             (stats['total'], stats['passes'], stats['fails']))
-    bot.say('%d broken test files, %d failing' %
-            (stats['broken'], stats['failing']))
+    bot.say('%d failing test files, %d broken' %
+            (stats['failing'], stats['broken']))
 
 
 @irc.Bot.command

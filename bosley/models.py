@@ -1,5 +1,5 @@
-from sqlalchemy import Column, ForeignKey, schema, func
-from sqlalchemy.orm import dynamic_loader, Query
+from sqlalchemy import Column, ForeignKey, schema
+from sqlalchemy.orm import dynamic_loader
 from sqlalchemy.ext.declarative import declarative_base
 import sqlalchemy.types as fields
 
@@ -11,33 +11,6 @@ Base = declarative_base(metadata=metadata)
 
 class Model(object):
     query = Session.query_property()
-
-
-class ResultQuery(Query):
-
-    def broken(self):
-        return self.filter_by(broken=True)
-
-    def failing(self):
-        return self.filter(Result.fails > 0)
-
-    def sum_passes(self):
-        return self.value(func.sum(Result.passes))
-
-    def sum_fails(self):
-        return self.value(func.sum(Result.fails))
-
-
-class Case(Base, Model):
-    __tablename__ = 'cases'
-    __table_args__ = (schema.UniqueConstraint('name'), {})
-
-    id = Column(fields.Integer, primary_key=True)
-    name = Column(fields.String(100))
-    results = dynamic_loader('Result', backref='case', query_class=ResultQuery)
-
-    def __repr__(self):
-        return '<Case %s>' % self.name
 
 
 class TestFile(Base, Model):
@@ -96,19 +69,10 @@ class Revision(Base, Model):
     message = Column(fields.UnicodeText)
     author = Column(fields.Unicode(100))
     date = Column(fields.DateTime)
-    results = dynamic_loader('Result', backref='revision',
-                             query_class=ResultQuery)
 
     tests = dynamic_loader('Test', backref='revision')
     testfiles = dynamic_loader('TestFile', backref='revision')
     assertions = dynamic_loader('Assertion', backref='revision')
-
-    def stats(self):
-        results = self.results
-        passes, fails = results.sum_passes(), results.sum_fails()
-        return {'broken': results.broken().count(),
-                'failing': results.failing().count(),
-                'passes': passes, 'fails': fails, 'total': passes + fails}
 
     def assertion_stats(self):
         passes = self.assertions.filter_by(fail=False).count()
@@ -117,18 +81,3 @@ class Revision(Base, Model):
                 'failing': self.testfiles.join(Test).join(Assertion)\
                                .filter(Assertion.fail == True).count(),
                 'passes': passes, 'fails': fails, 'total': passes + fails}
-
-
-class Result(Base, Model):
-    __tablename__ = 'results'
-    __table_args__ = (schema.UniqueConstraint('case_id', 'revision_id'), {})
-
-    id = Column(fields.Integer, primary_key=True)
-    broken = Column(fields.Boolean, default=False)
-    passes = Column(fields.Integer, default=0)
-    fails = Column(fields.Integer, default=0)
-
-    case_id = Column(fields.Integer, ForeignKey('cases.id'))
-    revision_id = Column(fields.Integer, ForeignKey('revisions.id'))
-
-    query = Session.query_property(ResultQuery)

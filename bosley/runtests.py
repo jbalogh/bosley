@@ -4,18 +4,15 @@ import itertools
 from Queue import Queue
 from threading import Thread
 
-import sqlalchemy.orm
-
 import remote
 import utils
 import vcs
-from models import Revision, Case, Result, TestFile, Test, Assertion
-from utils import get_session, metadata, Session
+from models import Revision, TestFile, Test, Assertion
+from utils import metadata, Session
 
 log = logging.getLogger(__file__)
 
 
-# Terrible name.
 def handle(commit):
     """Setup the repo at commit and run the tests."""
     log.debug('Processing %s' % commit)
@@ -66,47 +63,13 @@ def test_revision(rev):
     num_threads = 3
     threads = []
     for i in range(num_threads):
-        t = ThreadedTester(queue, rev)
+        t = ThreadedTester2(queue, rev)
         threads.append(t)
         t.start()
 
     for t in threads:
         log.debug("Joining " + t.getName())
         t.join()
-
-
-class ThreadedTester(Thread):
-
-    def __init__(self, queue, rev):
-        # Sessions can't be shared across threads.
-        self.session = get_session(wsgi=False)
-        self.queue =queue
-        self.rev = rev
-        Thread.__init__(self)
-
-    def run(self):
-        while not self.queue.empty():
-            case = self.queue.get()
-            log.debug('%s: Testing %s...' % (self.getName(), case))
-
-            result = self.test(case)
-            result.revision_id = self.rev
-            self.session.add(result)
-            self.session.commit()
-
-            log.debug('%s: Finished %s' % (self.getName(), result))
-
-    def test(self, case_name):
-        try:
-            case = self.session.query(Case).filter_by(name=case_name).one()
-        except sqlalchemy.orm.exc.NoResultFound:
-            case = Case(name=case_name)
-
-        try:
-            passes, fails = remote.analyze(case_name)
-            return Result(case=case, passes=passes, fails=fails)
-        except remote.BrokenTest:
-            return Result(case=case, broken=True)
 
 
 class ThreadedTester2(Thread):
@@ -134,7 +97,7 @@ class ThreadedTester2(Thread):
                     test.assertions.append(
                         Assertion(text=utils.force_unicode(assertion),
                                   revision_id=self.rev,
-                                  fail=assertion not in passing)
+                                  fail=assertion not in passing),
                     )
         except remote.BrokenTest:
             testfile.broken = True
@@ -150,12 +113,12 @@ def backfill():
     else:
         commit = vcs.before(oldest.git_id)
 
-    # Process tests as far back as we can.  Eventually, something will fail.
     def generator(commit):
         while True:
             yield commit
             commit = vcs.before(commit)
 
+    # Process tests as far back as we can.  Eventually, something will fail.
     process_commits(generator(commit))
 
 
@@ -186,4 +149,6 @@ def main():
 
 
 if __name__ == '__main__':
+    import warnings
+    warnings.simplefilter('error')
     main()

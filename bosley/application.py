@@ -2,9 +2,7 @@ from werkzeug import Request, ClosingIterator
 from werkzeug.exceptions import HTTPException
 
 import views
-from utils import local, local_manager, url_map, engine, get_session
-
-session = get_session(wsgi=True)
+from utils import local, local_manager, url_map, engine, Session
 
 
 class Application(object):
@@ -25,4 +23,4 @@ class Application(object):
         except HTTPException, e:
             response = e
         return ClosingIterator(response(environ, start_response),
-                               [session.remove, local_manager.cleanup])
+                               [Session.remove, local_manager.cleanup])

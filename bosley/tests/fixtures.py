@@ -4,7 +4,7 @@ import fixture
 
 # Need to be loaded so the fixture mapper can find them.
 from bosley import utils
-from bosley.models import Result, Revision, Case, TestFile, Test, Assertion
+from bosley.models import Revision, TestFile, Test, Assertion
 
 
 class RevisionData(fixture.DataSet):
@@ -22,42 +22,6 @@ class RevisionData(fixture.DataSet):
         message = u'foo'
         author = u'fred'
         date = datetime(2009, 03, 02)
-
-
-class CaseData(fixture.DataSet):
-
-    class failing:
-        name = 'failing case'
-
-    class broken:
-        name = 'broken case'
-
-
-class ResultData(fixture.DataSet):
-
-    # Inheriting to get the revision object.
-
-    class passing1:
-        revision = RevisionData.r1
-        passes = 22
-        fails = 0
-
-    class passing2(passing1):
-        passes = 13
-        fails = 0
-
-    class failing(passing1):
-        passes = 7
-        fails = 2
-        case = CaseData.failing
-
-    class broken(passing1):
-        broken = True
-        passes = fails = 0
-        case = CaseData.broken
-
-    class passing_r2(passing1):
-        revision = RevisionData.r2
 
 
 class TestFileData(fixture.DataSet):
@@ -152,9 +116,7 @@ class BaseCase(fixture.DataTestCase):
         env=globals(),
         style=fixture.TrimmedNameStyle(suffix="Data"),
     )
-    datasets = [RevisionData, ResultData, CaseData,
-                TestFileData, TestData, AssertionData,
-                ]
+    datasets = [RevisionData, TestFileData, TestData, AssertionData]
 
     def setup(self):
         utils.metadata.drop_all(utils.Session.bind)

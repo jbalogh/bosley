@@ -1,9 +1,7 @@
 from sqlalchemy import func
 
-from models import Revision, Result, Test, Assertion, TestFile
-from utils import expose, get_session, render_template
-
-session = get_session(wsgi=True)
+from models import Revision, Test, Assertion, TestFile
+from utils import expose, render_template
 
 
 @expose('/')
@@ -23,16 +21,3 @@ def revision_detail(request, rev):
                            revision=revision,
                            failing=failing.order_by(fail_count.desc()),
                            broken=testfiles.filter_by(broken=True))
-
-
-def stats(session, revision):
-    results = session.query(Result).filter_by(revision=revision)
-
-    broken = results.filter_by(broken=True).count()
-    failing = results.filter(Result.fails > 0).count()
-
-    passes = results.value(func.sum(Result.passes))
-    fails = results.value(func.sum(Result.fails))
-
-    return {'broken': broken, 'failing': failing, 'fails': fails,
-            'passes': passes, 'total': passes + fails}

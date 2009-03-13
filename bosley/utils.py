@@ -2,7 +2,7 @@ import logging
 
 from jinja import Environment, FileSystemLoader
 from sqlalchemy import MetaData, create_engine
-from sqlalchemy.orm import create_session, scoped_session, sessionmaker
+from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug import Local, LocalManager, Response
 from werkzeug.routing import Map, Rule
 
@@ -12,30 +12,22 @@ import settings
 logging.basicConfig(filename=settings.path('log'), level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s:%(name)s:%(message)s')
 
-local = Local()
-local_manager = LocalManager([local])
-application = local('application')
-
-metadata = MetaData()
-
-
-def get_session(wsgi=False):
-    if wsgi:
-        def create():
-            return create_session(application.engine, autocommit=False)
-        return scoped_session(create, local_manager.get_ident)
-    else:
-        return sessionmaker(bind=engine())()
-
 
 def engine():
     return create_engine(settings.DATABASE, convert_unicode=True)
 
+metadata = MetaData()
 Session = scoped_session(sessionmaker(bind=engine()))
 
-
+# Werkzeug stuff.
+local = Local()
+local_manager = LocalManager([local])
+application = local('application')
 url_map = Map()
+
+
 def expose(rule, **kw):
+
     def decorate(f):
         kw['endpoint'] = f.__name__
         url_map.add(Rule(rule, **kw))

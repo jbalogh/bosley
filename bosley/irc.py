@@ -46,7 +46,6 @@ class Bot(irclib.SimpleIRCClient, register.Commander):
 
     def on_welcome(self, c, e):
         c.join(self.channel)
-        self.say('greetings humans')
 
     def on_nicknameinuse(self, c, e):
         c.nick(c.get_nickname() + '_')

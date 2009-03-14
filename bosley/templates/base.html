@@ -4,6 +4,8 @@
   <head>
     <title>{% block title %}{% endblock %}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" type="text/css"
+          href="{{ url_for('media', file='boilerplate.css') }}">
     {% block extrahead %}{% endblock %}
   </head>
   <body>

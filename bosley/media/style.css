@@ -1,13 +1,21 @@
+body {
+  font-size: 87.5%;
+  margin-left: 1em;
+}
+
 .author, .message {
   white-space: pre;
   font-family: monospace;
-}   
+}
+
 .passing, .failing {
   font-weight: bold;
-}   
+}
+
 .passing {
   color: green;
-}   
+}
+
 .failing {
   color: red;
 }

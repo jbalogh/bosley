@@ -25,11 +25,11 @@
         <span class="testfile">{{ testfile.name }}</span>
         (<span class="failing">{{ fail_count }}</span>)
         <ul class="tests">
-          {% for test in testfile.tests.failing() %}
+          {% for (test_name, assertions) in failures[testfile.id] %}
             <li>
-              <span class="test">{{ test.name }}</span>
+              <span class="test">{{ test_name }}</span>
               <ul class="assertions">
-                {% for fail in test.assertions.failing() %}
+                {% for fail in assertions %}
                   <li class="assertion">{{ fail.text }}</li>
                 {% endfor %}
               </ul>

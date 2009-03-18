@@ -2,7 +2,7 @@ import operator
 
 from mock import patch, Mock
 
-from bosley import plugins
+from bosley import plugins, settings
 
 import fixtures
 
@@ -32,7 +32,8 @@ class TestPlugins(fixtures.BaseCase):
         bot_mock = Mock()
         plugins.status(bot_mock)
         bot_mock.say.assert_called_with(
-            'r2 (fred): -1 passing, +2 failing'
+            'r2 (fred): -1 passing, +2 failing (%s)'
+            % settings.REVISION_DETAIL_URL % 2
         )
 
     @patch('bosley.plugins.runtests')

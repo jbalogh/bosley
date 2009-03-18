@@ -4,6 +4,7 @@ import threading
 import pyquery
 
 import irc
+import settings
 import runtests
 from models import Revision, Assertion
 
@@ -22,8 +23,9 @@ def updater(bot):
 @irc.Bot.command('status', 'st', 'sitrep')
 def status(bot):
     rev, passing, failing = st()
-    bot.say('r%s (%s): %+d passing, %+d failing' %
-            (rev.svn_id, rev.author, passing, failing))
+    bot.say('r%s (%s): %+d passing, %+d failing (%s)' %
+            (rev.svn_id, rev.author, passing, failing,
+             settings.REVISION_DETAIL_URL % rev.svn_id))
 
 
 def st():

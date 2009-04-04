@@ -1,6 +1,6 @@
 import logging
 
-from jinja import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug import Local, LocalManager, Response

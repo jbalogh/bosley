@@ -1,4 +1,6 @@
-from sqlalchemy import Column, ForeignKey, schema
+import functools
+
+from sqlalchemy import Column, ForeignKey, schema, func
 from sqlalchemy.orm import dynamic_loader, Query
 from sqlalchemy.ext.declarative import declarative_base
 import sqlalchemy.types as fields
@@ -93,6 +95,18 @@ class Assertion(Base, Model):
     query = Session.query_property(AssertionQuery)
 
 
+cache = {}
+def cached_by(*attrs):
+    def cached(f):
+        def inner(self, *args):
+            vals = tuple(getattr(self, a) for a in attrs)
+            if vals not in cache:
+                cache[vals] = f(self, *args)
+            return cache[vals]
+        return inner
+    return cached
+
+
 class Revision(Base, Model):
     """A single revision in version control."""
     # needs a date for non-numeric revision sorting
@@ -113,6 +127,7 @@ class Revision(Base, Model):
     assertions = dynamic_loader('Assertion', backref='revision',
                                 query_class=AssertionQuery)
 
+    @cached_by('id')
     def assertion_stats(self):
         passes = self.assertions.passing().count()
         fails = self.assertions.failing().count()

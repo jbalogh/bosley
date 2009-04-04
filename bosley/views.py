@@ -5,13 +5,19 @@ from sqlalchemy import func
 from sqlalchemy.orm import eagerload_all
 
 from models import Revision, Assertion, TestFile
+from paginator import Paginator
 from utils import expose, render_template
 
 
-@expose('/')
-def revision_list(request):
-    revisions = Revision.query.order_by(Revision.date.desc())[:25]
-    return render_template('revision_list.html', revisions=revisions)
+PER_PAGE = 20
+
+
+@expose('/list/', defaults={'page': 1})
+@expose('/list/<int:page>')
+def revision_list(request, page):
+    revisions = Revision.query.order_by(Revision.date.desc())
+    page = Paginator(revisions, PER_PAGE).page(page)
+    return render_template('revision_list.html', page=page)
 
 
 @expose('/<int:rev>')

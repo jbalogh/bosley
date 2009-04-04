@@ -51,11 +51,11 @@ class TestViews(fixtures.BaseCase):
         self.client = Client(Application(), BaseResponse)
         fixtures.BaseCase.setUp(self)
 
-    @get('/', template_name='revision_list.html')
+    @get('/list/', template_name='revision_list.html')
     def test_revision_list(self, response, context, dom):
-        assert map(attrgetter('svn_id'), context['revisions']) == [2, 1]
+        assert map(attrgetter('svn_id'), context['page'].objects) == [2, 1]
         assert re.findall('(\d+) tests', dom('.total').text()) == ['5', '4']
-        assert [e.attrib['href'] for e in dom('dt a')] == ['/2', '/1']
+        assert [e.attrib['href'] for e in dom('dt a')] == ['/r/2', '/r/1']
         assert all(map(equiv, [e.text for e in dom('.files')], [
             '2 failing test files, 1 broken.',
             '1 failing test files, 1 broken.',

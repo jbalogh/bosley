@@ -10,7 +10,7 @@
 
 {% block content %}
   <dl>
-    {% for revision in revisions %}
+    {% for revision in page.objects %}
       {% set stats = revision.assertion_stats() %}
       <dt>
         <a href="{{ url_for('revision_detail', rev=revision.svn_id) }}">
@@ -31,4 +31,31 @@
       </dd>
     {% endfor %}
   </dl>
+
+  <ul class="paginator">
+    {% if page.has_prev %}
+      <li id="previous-page">
+        <a href="{{ url_for('revision_list', page=page.prev) }}">Previous</a>
+      </li>
+    {% endif %}
+
+    {% for page_num in page.paginator.range %}
+      {% if page_num == page.num %}
+        <li class="current">
+          <span>{{ page_num }}</span>
+        </li>
+      {% else %}
+        <li>
+          <a href="{{ url_for('revision_list', page=page_num) }}">{{ page_num }}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+
+    {% if page.has_next %}
+      <li id="next-page">
+        <a href="{{ url_for('revision_list', page=page.next) }}">Next</a>
+      </li>
+    {% endif %}
+  </ul>
+
 {% endblock %}

@@ -19,3 +19,22 @@ body {
 .failing {
   color: red;
 }
+
+dl dt {
+  margin-top: 1em;
+}
+
+#paginator li {
+  display: inline;
+  list-style-type: none;
+  padding-right: .1em;
+}
+
+#paginator a:hover {
+  text-decoration: none;
+}
+
+#paginator .current {
+  font-weight: bold;
+  font-size: 1.2em
+}

@@ -41,9 +41,11 @@ def get(url, status_code=200, template_name=''):
         return wrapper
     return inner
 
+
 def equiv(a, b):
     """Compare two strings, ignoring whitespace."""
     return ''.join(a.split()) == ''.join(b.split())
+
 
 class TestViews(fixtures.BaseCase):
 

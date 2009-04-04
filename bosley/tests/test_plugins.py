@@ -1,15 +1,15 @@
-import operator
-
 from mock import patch, Mock
 
 from bosley import plugins, settings
 
 import fixtures
 
+
 def test_gtfo():
     bot_mock = Mock()
     plugins.gtfo(bot_mock)
     bot_mock.say.assert_called_with('stfu')
+
 
 @patch('bosley.plugins.threading')
 def test_wtf(threading_mock):
@@ -18,6 +18,7 @@ def test_wtf(threading_mock):
     threading_mock.enumerate.return_value = [thread_mock, thread_mock]
     plugins.wtf(bot_mock)
     bot_mock.say.assert_called_with('name, name')
+
 
 def test_help():
     bot_mock = Mock()
@@ -33,8 +34,7 @@ class TestPlugins(fixtures.BaseCase):
         plugins.status(bot_mock)
         bot_mock.say.assert_called_with(
             'r2 (fred): -1 passing, +2 failing (%s)'
-            % settings.REVISION_DETAIL_URL % 2
-        )
+            % settings.REVISION_DETAIL_URL % 2)
 
     @patch('bosley.plugins.runtests')
     def test_updater(self, runtests_mock):
@@ -68,4 +68,3 @@ class TestPlugins(fixtures.BaseCase):
         plugins.report(bot_mock)
         calls = [args[0][0] for args in bot_mock.say.call_args_list]
         assert calls == ['5 tests: +2 -3', '2 failing test files, 1 broken']
-

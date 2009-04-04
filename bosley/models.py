@@ -98,6 +98,7 @@ class Assertion(Base, Model):
 cache = {}
 def cached_by(*attrs):
     def cached(f):
+        @functools.wraps(f)
         def inner(self, *args):
             vals = tuple(getattr(self, a) for a in attrs)
             if vals not in cache:

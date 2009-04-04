@@ -2,7 +2,7 @@ from pyquery import PyQuery
 from lxml.etree import XMLSyntaxError
 
 from nose.tools import assert_raises
-from mock import patch, Mock, sentinel
+from mock import patch, sentinel
 
 from bosley import remote, settings
 

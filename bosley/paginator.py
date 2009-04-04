@@ -18,11 +18,11 @@ class Paginator(object):
         top = bottom + self.per_page
         objects = self.objects[bottom:top]
         return Page(objects, num, self)
-    
+
     @cached_property
     def num_pages(self):
         return int(math.ceil(self.count / self.per_page))
-    
+
     @cached_property
     def count(self):
         return self.objects.count()
@@ -30,7 +30,7 @@ class Paginator(object):
     @cached_property
     def range(self):
         return range(1, 1 + self.num_pages)
-    
+
 
 class Page(object):
 

@@ -6,7 +6,7 @@ import pyquery
 import irc
 import settings
 import runtests
-from models import Revision, Assertion
+from models import Revision
 
 
 @irc.Bot.cron(60)
@@ -30,9 +30,8 @@ def status(bot):
 
 def st():
     q = Revision.query.order_by(Revision.date.desc())
-    def counts(x):
-        return x.passing().count(), x.failing().count()
-    a, b = [Assertion.query.filter_by(revision=r) for r in q[:2]]
+    a, b = [r.assertions for r in q[:2]]
+    counts = lambda x: (x.passing().count(), x.failing().count())
     passing, failing = map(operator.sub, counts(a), counts(b))
     return q.first(), passing, failing
 

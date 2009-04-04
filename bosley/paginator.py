@@ -34,23 +34,23 @@ class Paginator(object):
 
 class Page(object):
 
-    def __init__(self, objects, number, paginator):
+    def __init__(self, objects, num, paginator):
         self.objects = objects
-        self.number = number
+        self.num = num
         self.paginator = paginator
 
     @cached_property
     def has_next(self):
-        return self.number != self.paginator.num_pages
+        return self.num != self.paginator.num_pages
 
     @cached_property
     def has_prev(self):
-        return self.number != 1
+        return self.num != 1
 
     @cached_property
     def next(self):
-        return self.number + 1
+        return self.num + 1
 
     @cached_property
     def prev(self):
-        return self.number - 1
+        return self.num - 1

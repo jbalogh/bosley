@@ -61,7 +61,7 @@ class TestViews(fixtures.BaseCase):
             '1 failing test files, 1 broken.',
         ]))
 
-    @get('/2', template_name='revision_detail.html')
+    @get('/r/2', template_name='revision_detail.html')
     def test_revision_detail(self, response, context, d):
         assert context['revision'].svn_id == 2
         assert d('#stats').text() == '5 tests: +2 -3'

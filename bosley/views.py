@@ -20,7 +20,7 @@ def revision_list(request, page):
     return render_template('revision_list.html', page=page)
 
 
-@expose('/<int:rev>')
+@expose('/r/<int:rev>')
 def revision_detail(request, rev):
     revision = Revision.query.filter_by(svn_id=rev).one()
 

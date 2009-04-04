@@ -1,3 +1,4 @@
+/** General **/
 body {
   font-size: 87.5%;
   margin-left: 1em;
@@ -20,10 +21,12 @@ body {
   color: red;
 }
 
+/** Revision list **/
 dl dt {
   margin-top: 1em;
 }
 
+/** Paginator **/
 #paginator li {
   display: inline;
   list-style-type: none;
@@ -37,4 +40,36 @@ dl dt {
 #paginator .current {
   font-weight: bold;
   font-size: 1.2em
+}
+
+#testfiles,
+.assertions li {
+  list-style-type: none;
+}
+
+.tests, .assertions {
+  margin-bottom: 0.5em;
+}
+
+.tests > li {
+  list-style-type: disc;
+}
+
+.testfile {
+  font-weight: bold;
+  color: #222;
+}
+
+.test {
+  color: #111;
+}
+
+.test, .testfile {
+  font-family: Verdana;
+  font-size: 0.83em;
+}
+
+.assertion {
+  color: #333;
+  font-family: serif;
 }

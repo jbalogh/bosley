@@ -35,6 +35,15 @@ class TestFile(Base, Model):
     name = Column(fields.String(100))
     tests = dynamic_loader('Test', backref='testfile')
 
+    @classmethod
+    def join_results(cls, revision):
+        q = cls.q.join(Test).join(Assertion).join(Result)
+        return q.filter(Result.revision == revision)
+
+    @classmethod
+    def failing(cls, revision):
+        return cls.join_results(revision).filter(Result.fail == True)
+
 
 class Test(Base, Model):
     """
@@ -89,13 +98,10 @@ class Revision(Base, Model):
 
     @cached_by('id')
     def assertion_stats(self):
-        q = Result.q.filter_by(revision=self)
-        passes, fails = map(lambda x: x[0],
-                            q.group_by(Result.fail).values(func.count()))
-        failing = TestFile.q.join(Test).join(Assertion).join(Result)
-        failing = failing.filter(Result.revision_id == self.id).distinct()
+        q = Result.q.filter_by(revision=self).group_by(Result.fail)
+        passes, fails = map(lambda x: x[0], q.values(func.count()))
         return {'broken': self.broken_tests.count(),
-                'failing': failing.filter(Result.fail == True).count(),
+                'failing': TestFile.failing(self).distinct().count(),
                 'passes': passes, 'fails': fails, 'total': passes + fails}
 
 

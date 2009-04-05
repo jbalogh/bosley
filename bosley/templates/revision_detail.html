@@ -30,7 +30,10 @@
               <span class="test">{{ test_name }}</span>
               <ul class="assertions">
                 {% for fail in assertions %}
-                  <li class="assertion">{{ fail.text }}</li>
+                  <li class="assertion">
+                    {{ fail.text|perlsub('at \[/home/jbalogh.* (line \d+)\]',
+                                         '<span class="lineno">($1)</span>') }}
+                  </li>
                 {% endfor %}
               </ul>
             </li>

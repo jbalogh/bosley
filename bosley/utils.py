@@ -1,3 +1,4 @@
+import re
 import logging
 
 from jinja2 import Environment, FileSystemLoader
@@ -63,3 +64,21 @@ def force_unicode(s, encoding='utf-8', errors='strict'):
     elif not isinstance(s, unicode):
         s = s.decode(encoding, errors)
     return s
+
+
+def perlsub(string, regex, replacement):
+    """Does a regex sub; the replacement string can have $n groups."""
+    def sub(match):
+        groups = match.groups()
+        ret = []
+        for s in re.split('(\$\d+)', replacement):
+            match = re.match('\$(\d+)', s)
+            if match:
+                index = int(match.groups()[0]) - 1
+                ret.append(groups[index])
+            else:
+                ret.append(s)
+        return ''.join(ret)
+    return re.sub(regex, sub, string)
+
+jinja_env.filters['perlsub'] = perlsub

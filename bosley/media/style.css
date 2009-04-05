@@ -42,8 +42,7 @@ dl dt {
   font-size: 1.2em
 }
 
-#testfiles,
-.assertions li {
+#testfiles li {
   list-style-type: none;
 }
 
@@ -51,8 +50,20 @@ dl dt {
   margin-bottom: 0.5em;
 }
 
-.tests > li {
-  list-style-type: disc;
+.tests {
+  margin-left: 0.5em;
+}
+
+.assertions {
+  margin-left: 2em;
+}
+
+.lineno {
+  font-family: monospace;
+}
+
+#testfiles .assertions li {
+  list-style-type: decimal;
 }
 
 .testfile {

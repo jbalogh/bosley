@@ -25,12 +25,12 @@ local = Local()
 local_manager = LocalManager([local])
 application = local('application')
 url_map = Map([
+    Rule('/', redirect_to='/list/'),
     Rule('/media/<file>', endpoint='media', build_only=True),
 ])
 
 
 def expose(rule, **kw):
-
     def decorate(f):
         kw['endpoint'] = f.__name__
         url_map.add(Rule(rule, **kw))

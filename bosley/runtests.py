@@ -140,9 +140,13 @@ def update():
 
     vcs.checkout('master')
     vcs.rebase()
-    latest_recorded = Revision.query.order_by(Revision.date.desc())
+    latest_recorded = Revision.query.order_by(Revision.date.desc()).first()
+    if latest_recorded is None:
+        commit = [vcs.repo.commits()[0]]
+    else:
+        commit = vcs.following(latest_recorded.git_id)
 
-    process_commits(vcs.following(latest_recorded.first().git_id))
+    process_commits(commit)
 
 
 def process_commits(commits):

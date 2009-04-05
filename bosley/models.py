@@ -17,16 +17,11 @@ class Model(object):
     q = query
 
     @classmethod
-    def get_or_create(cls, *args, **kwargs):
-        # args can be any expression object that works with filter
+    def get_or_create(cls, **kwargs):
         # kwargs will be passed to filter_by
         defaults = kwargs.pop('defaults', {})
         try:
-            q = cls.q.filter_by(**kwargs)
-            if args:
-                # TODO: is this an SA bug?
-                q = q.filter(and_(*args))
-            return (q.one(), False)
+            return (cls.q.filter_by(**kwargs).one(), False)
         except NoResultFound:
             kwargs.update(defaults)
             return (cls(**kwargs), True)

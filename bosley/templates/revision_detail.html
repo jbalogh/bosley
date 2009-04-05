@@ -11,7 +11,7 @@
   <h1>r{{ revision.svn_id }}</h1>
   <h2>{{ revision.author }}</h2>
   <h3>{{ revision.date }}</h3>
-  <p class="message">{{ revision.message }}</p>
+  <p class="message">{{ revision.message|e }}</p>
   <p id="stats">
     {% set stats = revision.assertion_stats() %}
     {{ stats['total'] }} tests:
@@ -31,8 +31,8 @@
               <ul class="assertions">
                 {% for fail in assertions %}
                   <li class="assertion">
-                    {{ fail.text|perlsub('at \[/home/jbalogh.* (line \d+)\]',
-                                         '<span class="lineno">($1)</span>') }}
+                    {{ fail.text|e|perlsub('at \[/home/jbalogh.* (line \d+)\]',
+                                           '<span class="lineno">($1)</span>') }}
                   </li>
                 {% endfor %}
               </ul>

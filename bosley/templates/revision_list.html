@@ -20,7 +20,7 @@
         ({{ revision.git_id[:8] }})
       </dt>
       <dd class="author">{{ revision.author }}</dd>
-      <dd class="message">{{ revision.message }}</dd>
+      <dd class="message">{{ revision.message|e }}</dd>
       <dd>
         <span class="total">{{ stats['total'] }} tests:</span>
         <span class="passing">+{{ stats['passes'] }}</span>

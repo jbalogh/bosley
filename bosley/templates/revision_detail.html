@@ -44,8 +44,8 @@
   </ul>
   <h4>Broken Tests</h4>
   <ul id="broken">
-    {% for testfile in broken %}
-      <li>{{ testfile.name }}</li>
+    {% for b in broken %}
+      <li>{{ b.testfile.name }}</li>
     {% endfor %}
   </ul>
 

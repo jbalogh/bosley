@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from bosley.models import Revision, Assertion, TestFile
+from bosley.models import Revision, Assertion
 from bosley.tests import fixtures
 
 
@@ -13,10 +13,6 @@ class TestRevisionModel(fixtures.BaseCase):
         assert stats['passes'] == 2
         assert stats['fails'] == 3
         assert stats['total'] == 5
-
-    def test_assertions(self):
-        rev = Revision.query.filter_by(svn_id=1).one()
-        assert rev.assertions.count() == 4
 
     def test_unicode(self):
         session = Revision.query.session
@@ -33,12 +29,3 @@ class TestAssertionModel(fixtures.BaseCase):
         a = Assertion(text=u'αβγδεζηθικλμνξ')
         session.add(a)
         session.commit()
-
-
-class TestQueries(fixtures.BaseCase):
-
-    def test_failing(self):
-        t = TestFile.query.get(self.data.TestFileData.database_r2.id)
-        failing = t.tests.failing()
-        assert failing.count() == 1
-        assert failing.value('name') == self.data.TestData.testFallback_r2.name

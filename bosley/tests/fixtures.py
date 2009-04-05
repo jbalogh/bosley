@@ -4,7 +4,8 @@ import fixture
 
 # Need to be loaded so the fixture mapper can find them.
 from bosley import utils
-from bosley.models import Revision, TestFile, Test, Assertion
+from bosley.models import (Revision, TestFile, Test,
+                           Assertion, BrokenTest, Result)
 
 
 class RevisionData(fixture.DataSet):
@@ -26,89 +27,94 @@ class RevisionData(fixture.DataSet):
 
 class TestFileData(fixture.DataSet):
 
-    class broken_r1:
+    class broken:
         name = 'broken.tests'
-        broken = True
-        revision = RevisionData.r1
 
-    class database_r1:
+    class database:
         name = 'database.tests'
-        revision = RevisionData.r1
 
-    class broken_r2(broken_r1):
-        revision = RevisionData.r2
-
-    class database_r2(database_r1):
-        revision = RevisionData.r2
-
-    class config_r2(database_r2):
+    class config:
         name = 'config.test'
 
 
 class TestData(fixture.DataSet):
 
-    class testDefaults_r1:
+    class testDefaults:
         name = 'testDefaults'
-        testfile = TestFileData.database_r1
-        revision = RevisionData.r1
+        testfile = TestFileData.database
 
-    class testFallback_r1(testDefaults_r1):
+    class testFallback(testDefaults):
         name = 'testFallback'
 
-    class testDefaults_r2(testDefaults_r1):
-        testfile = TestFileData.database_r2
-        revision = RevisionData.r2
-
-    class testFallback_r2(testFallback_r1):
-        testfile = TestFileData.database_r2
-        revision = RevisionData.r2
-
-    class testConfig_r2(testFallback_r2):
-        testfile = TestFileData.config_r2
+    class testConfig:
+        testfile = TestFileData.config
         name = 'testConfig'
 
 
 class AssertionData(fixture.DataSet):
 
-    class default_r1:
+    class default:
         text = u'Default shadow db....'
+        test = TestData.testDefaults
+
+    class fallback(default):
+        text = u'Fallback to shadow...'
+        test = TestData.testFallback
+
+    class enabled(fallback):
+        text = u'Shadow databases are...'
+
+    class disabled(fallback):
+        text = u'Disabled shadow databases...'
+
+    class config:
+        text = u'Config bla bla...'
+        test = TestData.testConfig
+
+
+class BrokenTestData(fixture.DataSet):
+
+    class broken_r1:
+        revision = RevisionData.r1
+        testfile = TestFileData.broken
+
+    class broken_r2:
+        revision = RevisionData.r2
+        testfile = TestFileData.broken
+
+
+class ResultData(fixture.DataSet):
+
+    class default_r1:
         fail = False
-        test = TestData.testDefaults_r1
+        assertion = AssertionData.default
         revision = RevisionData.r1
 
     class fallback_r1(default_r1):
-        text = u'Fallback to shadow...'
-        test = TestData.testFallback_r1
+        assertion = AssertionData.fallback
 
-    class enabled_r1(fallback_r1):
-        text = u'Shadow databases are...'
+    class disabled_r1(default_r1):
+        assertion = AssertionData.disabled
+
+    class enabled_r1(default_r1):
+        assertion = AssertionData.enabled
         fail = True
 
-    class disabled_r1(fallback_r1):
-        text = u'Disabled shadow databases...'
-
     class default_r2(default_r1):
-        test = TestData.testDefaults_r2
         revision = RevisionData.r2
 
     class fallback_r2(fallback_r1):
-        fail = True
-        test = TestData.testFallback_r2
         revision = RevisionData.r2
+        fail = True
 
     class enabled_r2(enabled_r1):
-        test = TestData.testFallback_r2
         revision = RevisionData.r2
 
     class disabled_r2(disabled_r1):
-        test = TestData.testFallback_r2
         revision = RevisionData.r2
 
-    class config_r2:
-        text = u'Config bla bla...'
-        fail = True
-        test = TestData.testConfig_r2
-        revision = RevisionData.r2
+    class config_r2(fallback_r2):
+        assertion = AssertionData.config
 
 
 class BaseCase(fixture.DataTestCase):
@@ -116,7 +122,8 @@ class BaseCase(fixture.DataTestCase):
         env=globals(),
         style=fixture.TrimmedNameStyle(suffix="Data"),
     )
-    datasets = [RevisionData, TestFileData, TestData, AssertionData]
+    datasets = [RevisionData, TestFileData, TestData, AssertionData,
+                ResultData, BrokenTestData]
 
     def setup(self):
         utils.metadata.drop_all(utils.Session.bind)

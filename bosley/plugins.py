@@ -1,4 +1,3 @@
-import operator
 import threading
 
 import pyquery
@@ -29,10 +28,12 @@ def status(bot):
 
 
 def st():
-    q = Revision.query.order_by(Revision.date.desc())
-    a, b = [r.assertions for r in q[:2]]
-    counts = lambda x: (x.passing().count(), x.failing().count())
-    passing, failing = map(operator.sub, counts(a), counts(b))
+    q = Revision.q.order_by(Revision.date.desc())
+    def counts(x):
+        r = x.results
+        return [q.count() for q in
+                (r.filter_by(fail=False), r.filter_by(fail=True))]
+    passing, failing = [x - y for (x, y) in map(counts, q[:2])]
     return q.first(), passing, failing
 
 

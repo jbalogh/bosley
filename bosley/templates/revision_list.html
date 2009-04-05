@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "paginator.html" as paginator %}
 
 {% block extrahead %}
   <link rel="stylesheet" type="text/css"
@@ -10,7 +11,7 @@
 
 {% block content %}
   <dl>
-    {% for revision in revisions %}
+    {% for revision in page.objects %}
       {% set stats = revision.assertion_stats() %}
       <dt>
         <a href="{{ url_for('revision_detail', rev=revision.svn_id) }}">
@@ -31,4 +32,7 @@
       </dd>
     {% endfor %}
   </dl>
+
+  {{ paginator.paginator(page, 'revision_list') }}
+
 {% endblock %}

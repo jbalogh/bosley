@@ -1,0 +1,21 @@
+{% macro paginator(page, view_name) %}
+  <ul id="paginator">
+    {% for page_num in page.paginator.range %}
+      {% if page_num == page.num %}
+        <li class="current">
+          <span>{{ page_num }}</span>
+        </li>
+      {% else %}
+        {% if page_num == page.prev %}
+          <li class="prev">
+        {% elif page_num == page.next %}
+          <li class="next">
+        {% else %}
+          <li>
+        {% endif %}
+          <a href="{{ url_for(view_name, page=page_num) }}">{{ page_num }}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+{% endmacro %}

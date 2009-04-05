@@ -7,7 +7,8 @@ from mock import patch, Mock, sentinel
 from nose.tools import assert_raises
 
 from bosley import runtests, remote
-from bosley.models import Revision, TestFile, Assertion, Test
+from bosley.models import (Revision, TestFile, Assertion,
+                           Test, Result, BrokenTest)
 
 import fixtures
 
@@ -52,7 +53,7 @@ class TestCase(fixtures.BaseCase):
     def test_backfill_first_call(self, vcs_mock, process_mock, revision_mock):
         mock_query = Mock()
         mock_query.first.return_value = None
-        revision_mock.query.order_by.return_value = mock_query
+        revision_mock.q.order_by.return_value = mock_query
 
         vcs_mock.repo.commits.return_value = [sentinel.Commit]
         runtests.backfill()
@@ -68,7 +69,7 @@ class TestCase(fixtures.BaseCase):
                                   'message': u'I\xf1t\xebrn\xe2ti\xf4n\xe0l',
                                   'author': u'\u03bcs\xeb\u044f'}
         runtests.test_commit(sentinel.id)
-        assert Revision.query.filter_by(git_id=git_id).count() == 1
+        assert Revision.q.filter_by(git_id=git_id).count() == 1
 
     @patch('bosley.runtests.vcs.info')
     @patch('bosley.runtests.test_revision')
@@ -91,24 +92,25 @@ class TestCase(fixtures.BaseCase):
 
         tester.run()
 
-        assert TestFile.query.filter_by(name=testfile_name).count() == 1
+        assert TestFile.q.filter_by(name=testfile_name).count() == 1
 
     @patch('bosley.remote.test')
     def test_test_runner(self, test_mock):
-        testfile = Mock()
-        testfile.tests = []
         test_mock.return_value = PyQuery(fixtures.testcase_xml)
 
-        tester = runtests.ThreadedTester2(Mock(), 5)
+        rev = 5
+        tester = runtests.ThreadedTester2(Mock(), rev)
+        testfile = TestFile()
         tester.test(testfile)
 
         names = 'testFallback testNoErrors testDefaults testPopulated'.split()
         assert [t.name for t in testfile.tests] == names
 
-        q = Assertion.query.filter_by(revision_id=self.data.RevisionData.r1.id)
-        assert q.count() == 4
+        q = Result.q.filter_by(revision_id=rev)
+        assert q.count() == 6
         assert q.filter_by(fail=True).count() == 1
-        assert q.join(Test).filter(Test.name == 'testFallback').count() == 3
+        q = q.join(Assertion).join(Test)
+        assert q.filter(Test.name == 'testFallback').count() == 3
 
     @patch('bosley.runtests.remote.analyze2')
     def test_test_runner_error(self, analyze_mock):
@@ -117,11 +119,12 @@ class TestCase(fixtures.BaseCase):
             raise remote.BrokenTest
         analyze_mock.side_effect = broken_test
 
-        testfile = Mock()
-        tester = runtests.ThreadedTester2(Mock(), Mock())
+        rev = 7
+        tester = runtests.ThreadedTester2(Mock(), rev)
+        testfile = TestFile()
         tester.test(testfile)
 
-        assert testfile.broken is True
+        assert BrokenTest.q.filter_by(revision_id=rev).count() == 1
 
 
 @patch('bosley.runtests.backfill')

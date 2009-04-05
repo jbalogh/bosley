@@ -1,4 +1,3 @@
-import operator
 import threading
 
 import pyquery
@@ -6,12 +5,12 @@ import pyquery
 import irc
 import settings
 import runtests
-from models import Revision, Assertion
+from models import Revision
 
 
 @irc.Bot.cron(60)
 def updater(bot):
-    q = Revision.query.order_by(Revision.date.desc())
+    q = Revision.q.order_by(Revision.date.desc())
     latest = q.first()
     runtests.update()
     if latest.id != q.first().id:
@@ -29,11 +28,12 @@ def status(bot):
 
 
 def st():
-    q = Revision.query.order_by(Revision.date.desc())
+    q = Revision.q.order_by(Revision.date.desc())
     def counts(x):
-        return x.passing().count(), x.failing().count()
-    a, b = [Assertion.query.filter_by(revision=r) for r in q[:2]]
-    passing, failing = map(operator.sub, counts(a), counts(b))
+        r = x.results
+        return [q.count() for q in
+                (r.filter_by(fail=False), r.filter_by(fail=True))]
+    passing, failing = [x - y for (x, y) in map(counts, q[:2])]
     return q.first(), passing, failing
 
 
@@ -54,7 +54,7 @@ def wtf(bot):
 
 @irc.Bot.command
 def report(bot):
-    rev = Revision.query.order_by(Revision.date.desc()).first()
+    rev = Revision.q.order_by(Revision.date.desc()).first()
     stats = rev.assertion_stats()
     bot.say('%d tests: +%d -%d' %
             (stats['total'], stats['passes'], stats['fails']))

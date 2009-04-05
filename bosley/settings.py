@@ -11,4 +11,4 @@ BASE = 'http://bot.khan.mozilla.org/amo/site/en-US/firefox/tests/xml/?'
 
 TEMPLATE_PATH = path('templates')
 
-REVISION_DETAIL_URL = 'http://jbalogh.khan.mozilla.org:5000/%s'
+REVISION_DETAIL_URL = 'http://jbalogh.khan.mozilla.org:5000/r/%s'

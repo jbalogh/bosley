@@ -1,6 +1,7 @@
+import re
 import logging
 
-from jinja import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug import Local, LocalManager, Response
@@ -24,12 +25,12 @@ local = Local()
 local_manager = LocalManager([local])
 application = local('application')
 url_map = Map([
+    Rule('/', redirect_to='/list/'),
     Rule('/media/<file>', endpoint='media', build_only=True),
 ])
 
 
 def expose(rule, **kw):
-
     def decorate(f):
         kw['endpoint'] = f.__name__
         url_map.add(Rule(rule, **kw))
@@ -63,3 +64,21 @@ def force_unicode(s, encoding='utf-8', errors='strict'):
     elif not isinstance(s, unicode):
         s = s.decode(encoding, errors)
     return s
+
+
+def perlsub(string, regex, replacement):
+    """Does a regex sub; the replacement string can have $n groups."""
+    def sub(match):
+        groups = match.groups()
+        ret = []
+        for s in re.split('(\$\d+)', replacement):
+            match = re.match('\$(\d+)', s)
+            if match:
+                index = int(match.groups()[0]) - 1
+                ret.append(groups[index])
+            else:
+                ret.append(s)
+        return ''.join(ret)
+    return re.sub(regex, sub, string)
+
+jinja_env.filters['perlsub'] = perlsub

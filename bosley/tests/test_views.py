@@ -41,9 +41,11 @@ def get(url, status_code=200, template_name=''):
         return wrapper
     return inner
 
+
 def equiv(a, b):
     """Compare two strings, ignoring whitespace."""
     return ''.join(a.split()) == ''.join(b.split())
+
 
 class TestViews(fixtures.BaseCase):
 
@@ -51,17 +53,17 @@ class TestViews(fixtures.BaseCase):
         self.client = Client(Application(), BaseResponse)
         fixtures.BaseCase.setUp(self)
 
-    @get('/', template_name='revision_list.html')
+    @get('/list/', template_name='revision_list.html')
     def test_revision_list(self, response, context, dom):
-        assert map(attrgetter('svn_id'), context['revisions']) == [2, 1]
+        assert map(attrgetter('svn_id'), context['page'].objects) == [2, 1]
         assert re.findall('(\d+) tests', dom('.total').text()) == ['5', '4']
-        assert [e.attrib['href'] for e in dom('dt a')] == ['/2', '/1']
+        assert [e.attrib['href'] for e in dom('dt a')] == ['/r/2', '/r/1']
         assert all(map(equiv, [e.text for e in dom('.files')], [
             '2 failing test files, 1 broken.',
             '1 failing test files, 1 broken.',
         ]))
 
-    @get('/2', template_name='revision_detail.html')
+    @get('/r/2', template_name='revision_detail.html')
     def test_revision_detail(self, response, context, d):
         assert context['revision'].svn_id == 2
         assert d('#stats').text() == '5 tests: +2 -3'

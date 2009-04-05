@@ -34,6 +34,8 @@ def revision_detail(request, rev):
     failures = {}
     q = Assertion.q.join(Result).filter_by(fail=True, revision=revision)
     q = q.order_by(Assertion.test_id).options(eagerload_all('test.testfile'))
+    # Explicit JOIN; otherwise SA generates horrid LEFT OUTER JOINs.
+    q = q.join(Test).join(TestFile)
     for test, assertions in itertools.groupby(q, attrgetter('test')):
         fail_list = failures.setdefault(test.testfile.id, [])
         fail_list.append((test.name, list(assertions)))

@@ -1,5 +1,4 @@
 import re
-import logging
 
 from jinja2 import Environment, FileSystemLoader
 from sqlalchemy import MetaData, create_engine
@@ -8,10 +7,10 @@ from werkzeug import Local, LocalManager, Response
 from werkzeug.routing import Map, Rule
 
 import settings
+import log
 
 
-logging.basicConfig(filename=settings.path('log'), level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s:%(name)s:%(message)s')
+log.stab_java()
 
 
 def engine():

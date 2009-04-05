@@ -10,7 +10,7 @@ from models import Revision
 
 @irc.Bot.cron(60)
 def updater(bot):
-    q = Revision.query.order_by(Revision.date.desc())
+    q = Revision.q.order_by(Revision.date.desc())
     latest = q.first()
     runtests.update()
     if latest.id != q.first().id:
@@ -54,7 +54,7 @@ def wtf(bot):
 
 @irc.Bot.command
 def report(bot):
-    rev = Revision.query.order_by(Revision.date.desc()).first()
+    rev = Revision.q.order_by(Revision.date.desc()).first()
     stats = rev.assertion_stats()
     bot.say('%d tests: +%d -%d' %
             (stats['total'], stats['passes'], stats['fails']))

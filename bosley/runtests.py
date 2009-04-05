@@ -35,14 +35,14 @@ def handle(commit):
 def test_commit(id):
     revdata = vcs.info(id)
 
-    if Revision.query.filter_by(git_id=revdata['git_id']).count() != 0:
+    if Revision.q.filter_by(git_id=revdata['git_id']).count() != 0:
         return
 
     revdata['message'] = utils.force_unicode(revdata['message'])
     revdata['author'] = utils.force_unicode(revdata['author'])
     revision = Revision(**revdata)
 
-    session = Revision.query.session
+    session = Revision.q.session
     session.add(revision)
     with CommitLock:
         session.commit()
@@ -52,7 +52,7 @@ def test_commit(id):
     except:
         # Something bad happened, delete everything that was just created.
         for model in BrokenTest, Result:
-            model.query.filter_by(revision=revision).delete()
+            model.q.filter_by(revision=revision).delete()
         session.delete(revision)
         with CommitLock:
             session.commit()
@@ -119,7 +119,7 @@ def backfill():
     """Populate old test data: used for going backwards."""
     metadata.create_all(Session.bind)
 
-    oldest = Revision.query.order_by(Revision.date.asc()).first()
+    oldest = Revision.q.order_by(Revision.date.asc()).first()
     if oldest is None:
         commit = vcs.repo.commits()[0]
     else:
@@ -140,7 +140,7 @@ def update():
 
     vcs.checkout('master')
     vcs.rebase()
-    latest_recorded = Revision.query.order_by(Revision.date.desc()).first()
+    latest_recorded = Revision.q.order_by(Revision.date.desc()).first()
     if latest_recorded is None:
         commit = [vcs.repo.commits()[0]]
     else:

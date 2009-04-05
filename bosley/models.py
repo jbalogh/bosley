@@ -13,8 +13,7 @@ Base = declarative_base(metadata=metadata)
 
 
 class Model(object):
-    query = Session.query_property()
-    q = query
+    q = Session.query_property()
 
     @classmethod
     def get_or_create(cls, **kwargs):

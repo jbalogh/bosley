@@ -15,14 +15,14 @@ PER_PAGE = 20
 @expose('/list/', defaults={'page': 1})
 @expose('/list/<int:page>')
 def revision_list(request, page):
-    revisions = Revision.query.order_by(Revision.date.desc())
+    revisions = Revision.q.order_by(Revision.date.desc())
     page = Paginator(revisions, PER_PAGE).page(page)
     return render_template('revision_list.html', page=page)
 
 
 @expose('/r/<int:rev>')
 def revision_detail(request, rev):
-    revision = Revision.query.filter_by(svn_id=rev).one()
+    revision = Revision.q.filter_by(svn_id=rev).one()
 
     q = TestFile.q.join(Test).join(Assertion).join(Result)
     q = q.filter(Result.revision_id == revision.id)

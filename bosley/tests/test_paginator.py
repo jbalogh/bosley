@@ -12,9 +12,9 @@ class TestPaginator(fixtures.BaseCase):
         super(TestPaginator, self).setup()
 
         self.count = 10
-        Revision.query.session.add_all(Revision(message=u'page')
-                                       for x in range(self.count))
-        objects = Revision.query.filter_by(message=u'page')
+        Revision.q.session.add_all(Revision(message=u'page')
+                                   for x in range(self.count))
+        objects = Revision.q.filter_by(message=u'page')
         self.p = Paginator(objects, per_page=4)
 
     def test_count(self):

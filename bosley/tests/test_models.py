@@ -6,7 +6,7 @@ from bosley.tests import fixtures
 class TestRevisionModel(fixtures.BaseCase):
 
     def test_assertion_stats(self):
-        rev = Revision.query.filter_by(svn_id=2).one()
+        rev = Revision.q.filter_by(svn_id=2).one()
         stats = rev.assertion_stats()
         assert stats['broken'] == 1
         assert stats['failing'] == 2
@@ -15,7 +15,7 @@ class TestRevisionModel(fixtures.BaseCase):
         assert stats['total'] == 5
 
     def test_unicode(self):
-        session = Revision.query.session
+        session = Revision.q.session
         r = Revision(message=u'αβγδεζηθικλμνξ',
                      author=u'爆発物持者立入禁止')
         session.add(r)
@@ -25,7 +25,7 @@ class TestRevisionModel(fixtures.BaseCase):
 class TestAssertionModel(fixtures.BaseCase):
 
     def test_unicode(self):
-        session = Assertion.query.session
+        session = Assertion.q.session
         a = Assertion(text=u'αβγδεζηθικλμνξ')
         session.add(a)
         session.commit()

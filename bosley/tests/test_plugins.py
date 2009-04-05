@@ -48,7 +48,7 @@ class TestPlugins(fixtures.BaseCase):
     @patch('bosley.plugins.st')
     def test_updater_changes(self, runtests_mock, revision_mock, st_mock):
         bot_mock, q_mock = Mock(), Mock()
-        revision_mock.query.order_by.return_value = q_mock
+        revision_mock.q.order_by.return_value = q_mock
         q_mock.first = [Mock(), Mock(), Mock(), Mock()].pop
 
         st_mock.return_value = 1, 2, 3

@@ -53,7 +53,7 @@ class TestCase(fixtures.BaseCase):
     def test_backfill_first_call(self, vcs_mock, process_mock, revision_mock):
         mock_query = Mock()
         mock_query.first.return_value = None
-        revision_mock.query.order_by.return_value = mock_query
+        revision_mock.q.order_by.return_value = mock_query
 
         vcs_mock.repo.commits.return_value = [sentinel.Commit]
         runtests.backfill()
@@ -69,7 +69,7 @@ class TestCase(fixtures.BaseCase):
                                   'message': u'I\xf1t\xebrn\xe2ti\xf4n\xe0l',
                                   'author': u'\u03bcs\xeb\u044f'}
         runtests.test_commit(sentinel.id)
-        assert Revision.query.filter_by(git_id=git_id).count() == 1
+        assert Revision.q.filter_by(git_id=git_id).count() == 1
 
     @patch('bosley.runtests.vcs.info')
     @patch('bosley.runtests.test_revision')
@@ -92,7 +92,7 @@ class TestCase(fixtures.BaseCase):
 
         tester.run()
 
-        assert TestFile.query.filter_by(name=testfile_name).count() == 1
+        assert TestFile.q.filter_by(name=testfile_name).count() == 1
 
     @patch('bosley.remote.test')
     def test_test_runner(self, test_mock):
@@ -106,7 +106,7 @@ class TestCase(fixtures.BaseCase):
         names = 'testFallback testNoErrors testDefaults testPopulated'.split()
         assert [t.name for t in testfile.tests] == names
 
-        q = Result.query.filter_by(revision_id=rev)
+        q = Result.q.filter_by(revision_id=rev)
         assert q.count() == 6
         assert q.filter_by(fail=True).count() == 1
         q = q.join(Assertion).join(Test)

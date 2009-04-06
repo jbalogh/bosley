@@ -2,6 +2,7 @@
 body {
   font-size: 87.5%;
   margin-left: 1em;
+  max-width: 50em;
 }
 
 .author, .message {
@@ -48,13 +49,14 @@ dl dt {
 
 .tests, .assertions {
   margin-bottom: 0.5em;
+  margin-right: 0;
 }
 
-.tests {
+ul.tests {
   margin-left: 0.5em;
 }
 
-.assertions {
+ul.assertions {
   margin-left: 2em;
 }
 
@@ -66,6 +68,11 @@ dl dt {
   list-style-type: decimal;
 }
 
+.test, .testfile {
+  font-family: Verdana;
+  font-size: 0.83em;
+}
+
 .testfile {
   font-weight: bold;
   color: #222;
@@ -75,12 +82,20 @@ dl dt {
   color: #111;
 }
 
-.test, .testfile {
-  font-family: Verdana;
-  font-size: 0.83em;
-}
-
 .assertion {
   color: #333;
   font-family: serif;
+}
+
+.new, .broke {
+  background-color: #d94929;
+  -moz-border-radius: 10px; /* Oh yeah. */
+}
+
+.new .assertion, .broke .assertion {
+  color: #222;
+}
+
+.tests li {
+  padding-left: 1em;
 }

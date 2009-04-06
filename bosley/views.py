@@ -1,7 +1,7 @@
 import itertools
 from operator import attrgetter
 
-from sqlalchemy import func
+from sqlalchemy import func, and_
 from sqlalchemy.orm import eagerload_all
 
 from models import Revision, Assertion, TestFile, Result, Test
@@ -23,6 +23,7 @@ def revision_list(request, page):
 @expose('/r/<int:rev>')
 def revision_detail(request, rev):
     revision = Revision.q.filter_by(svn_id=rev).one()
+    previous = Revision.q.filter(Revision.svn_id < rev).first()
 
     fail_count = func.count(Result.fail)
     failing = (TestFile.failing(revision).group_by(TestFile.id).
@@ -42,4 +43,42 @@ def revision_detail(request, rev):
 
     return render_template('revision_detail.html', revision=revision,
                            failing=failing, failures=failures,
+                           diff=Diff(revision, previous),
                            broken=revision.broken_tests)
+
+
+def r(svn_id):
+    q = (Result.q.join(Revision).join(Assertion).join(Test)
+         .filter(and_(Revision.svn_id == svn_id, Result.fail == True))
+         .group_by(Test.id))
+    return list(q.values(Test.name, func.count(Test.id)))
+
+
+class Diff(object):
+    """Analyze the differences between two revisions."""
+
+    def __init__(self, a, b):
+        """a and b are Revisions."""
+        self.a, self.b = r(a.svn_id), r(b.svn_id)
+        self.diff = set(self.a).difference(set(self.b))
+
+        self.broke, self.fixed, self.new = [], [], []
+
+        b_dict = dict(self.b)
+        for a_name, a_num in self.diff:
+            if a_name in b_dict:
+                if a_num > b_dict[a_name]:
+                    self.broke.append(a_name)
+                else:
+                    self.fixed.append(a_name)
+            else:
+                self.new.append(a_name)
+
+    def category(self, name):
+        """Return the category the test falls in as a string."""
+        # Mostly useful for templates.
+        for attr in ('new', 'broke', 'fixed'):
+            if name in getattr(self, attr):
+                return attr
+        else:
+            return ''

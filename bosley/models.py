@@ -61,6 +61,7 @@ class Test(Base, Model):
 class Assertion(Base, Model):
     """ A single passing/failing assertion in a test."""
     __tablename__ = 'assertions'
+    __table_args__ = (schema.UniqueConstraint('text', 'test_id'), {})
 
     id = Column(fields.Integer, primary_key=True)
     text = Column(fields.UnicodeText)

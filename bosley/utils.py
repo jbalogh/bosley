@@ -25,6 +25,7 @@ local_manager = LocalManager([local])
 application = local('application')
 url_map = Map([
     Rule('/', redirect_to='/list/'),
+    Rule('/r/', redirect_to='/list/'),
     Rule('/media/<file>', endpoint='media', build_only=True),
 ])
 

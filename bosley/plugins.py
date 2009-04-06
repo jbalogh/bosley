@@ -29,11 +29,9 @@ def status(bot):
 
 def st():
     q = Revision.q.order_by(Revision.date.desc())
-    def counts(x):
-        r = x.results
-        return [q.count() for q in
-                (r.filter_by(fail=False), r.filter_by(fail=True))]
-    passing, failing = [x - y for (x, y) in map(counts, q[:2])]
+    stats = [r.assertion_stats() for r in q[:2]]
+    passing = stats[0]['passes'] - stats[1]['passes']
+    failing = stats[0]['fails'] - stats[1]['fails']
     return q.first(), passing, failing
 
 

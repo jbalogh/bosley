@@ -67,7 +67,7 @@ def test_revision(rev):
     # XXX: testing speed is currently limited by languageConfig.test.php,
     # which takes 30s to timeout.  The number of threads could be upped
     # once this is fixed.
-    num_threads = 4
+    num_threads = 1
     threads = []
     for i in range(num_threads):
         t = ThreadedTester2(queue, rev)

@@ -76,3 +76,5 @@ class TestViews(fixtures.BaseCase):
         testFallback Shadow databases are... Fallback to shadow...
         """
         assert equiv(d('#testfiles').text(), text)
+        assert d('.new .test').text() == 'testConfig'
+        assert d('.broke .test').text() == 'testFallback'

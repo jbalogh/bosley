@@ -48,8 +48,8 @@
   <ul id="broken">
     {% for b in broken %}
       <li>
-        <a class="testfile" href="{{ testfile.target_url }}">
-          {{ testfile.name }}
+        <a class="testfile" href="{{ b.testfile.target_url }}">
+          {{ b.testfile.name }}
         </a>
       </li>
     {% endfor %}

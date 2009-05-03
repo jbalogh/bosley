@@ -69,19 +69,6 @@ class Assertion(Base, Model):
     result = dynamic_loader('Result', backref='assertion')
 
 
-cache = {}
-def cached_by(*attrs):
-    def cached(f):
-        @functools.wraps(f)
-        def inner(self, *args):
-            vals = tuple(getattr(self, a) for a in attrs)
-            if vals not in cache:
-                cache[vals] = f(self, *args)
-            return cache[vals]
-        return inner
-    return cached
-
-
 class Revision(Base, Model):
     """A single revision in version control."""
     __tablename__ = 'revisions'
@@ -97,7 +84,6 @@ class Revision(Base, Model):
     results = dynamic_loader('Result', backref='revision')
     broken_tests = dynamic_loader('BrokenTest', backref='revision')
 
-    @cached_by('id')
     def assertion_stats(self):
         q = Result.q.filter_by(revision=self).group_by(Result.fail)
         passes, fails = map(lambda x: x[0], q.values(func.count()))

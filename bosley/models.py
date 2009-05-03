@@ -1,3 +1,4 @@
+# -*- delete-whitespace: t -*-
 import functools
 
 from sqlalchemy import Column, ForeignKey, schema, func, and_
@@ -6,6 +7,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.ext.declarative import declarative_base
 import sqlalchemy.types as fields
 
+import settings
 from utils import metadata, Session
 
 
@@ -43,6 +45,10 @@ class TestFile(Base, Model):
     @classmethod
     def failing(cls, revision):
         return cls.join_results(revision).filter(Result.fail == True)
+
+    def target_url(self):
+        """Returns an absolute URL where this test was run."""
+        return settings.TEST_URL % self.name
 
 
 class Test(Base, Model):

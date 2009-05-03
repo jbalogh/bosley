@@ -22,7 +22,9 @@
   <ul id="testfiles">
     {% for testfile, fail_count in failing %}
       <li>
-        <span class="testfile">{{ testfile.name }}</span>
+        <a class="testfile" href="{{ testfile.target_url }}">
+          {{ testfile.name }}
+        </a>
         (<span class="failing">{{ fail_count }}</span>)
         <ul class="tests">
           {% for (test_name, assertions) in failures[testfile.id] %}
@@ -45,7 +47,11 @@
   <h4>Broken Tests</h4>
   <ul id="broken">
     {% for b in broken %}
-      <li>{{ b.testfile.name }}</li>
+      <li>
+        <a class="testfile" href="{{ testfile.target_url }}">
+          {{ testfile.name }}
+        </a>
+      </li>
     {% endfor %}
   </ul>
 

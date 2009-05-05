@@ -7,10 +7,10 @@ import threading
 from Queue import Queue
 
 import remote
-import utils
+import settings
 import vcs
 from models import Revision, TestFile, Test, Assertion, BrokenTest, Result
-from utils import metadata, Session
+from utils import force_unicode, metadata, Session
 
 log = logging.getLogger(__file__)
 
@@ -38,8 +38,8 @@ def test_commit(id):
     if Revision.q.filter_by(git_id=revdata['git_id']).count() != 0:
         return
 
-    revdata['message'] = utils.force_unicode(revdata['message'])
-    revdata['author'] = utils.force_unicode(revdata['author'])
+    revdata['message'] = force_unicode(revdata['message'])
+    revdata['author'] = force_unicode(revdata['author'])
     revision = Revision(**revdata)
 
     session = Revision.q.session
@@ -105,7 +105,7 @@ class ThreadedTester2(threading.Thread):
                 testfile.tests.append(test)
                 for assertion in itertools.chain(passing, failing):
                     a, _ = Assertion.get_or_create(
-                        text=utils.force_unicode(assertion),
+                        text=force_unicode(assertion),
                         test=test)
                     result = Result(assertion=a, fail=assertion in failing,
                                     revision_id=self.rev)

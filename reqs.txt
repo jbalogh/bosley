@@ -6,6 +6,7 @@ Werkzeug==0.5
 fixture==1.1.2
 httplib2==0.4.0
 ipython==0.9.1
+lockfile==0.8
 lxml==2.2
 mock==0.4.0
 nose==0.10.4

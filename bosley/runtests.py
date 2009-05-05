@@ -6,6 +6,8 @@ import itertools
 import threading
 from Queue import Queue
 
+import lockfile
+
 import remote
 import settings
 import vcs
@@ -16,20 +18,33 @@ log = logging.getLogger(__file__)
 
 CommitLock = threading.Lock()
 
+LOCKFILE_PATH = settings.path('bosley.lock')
+
 
 def handle(commit):
     """Setup the repo at commit and run the tests."""
-    log.debug('Processing %s' % commit)
+    lock = lockfile.FileLock(LOCKFILE_PATH)
+    # Don't block waiting for a lock. TODO: make this configurable.
     try:
-        vcs.checkout(commit)
+        lock.acquire(0)
+
+        log.debug('Processing %s' % commit)
         try:
-            remote.cases()
-        except remote.DiscoveryError:
-            vcs.apply_testing_patch()
-        test_commit(commit)
+            vcs.checkout(commit)
+            try:
+                remote.cases()
+            except remote.DiscoveryError:
+                vcs.apply_testing_patch()
+            test_commit(commit)
+        finally:
+            vcs.reset(commit)
+        log.debug('Finished %s' % commit)
+
     finally:
-        vcs.reset(commit)
-    log.debug('Finished %s' % commit)
+        try:
+            lock.release()
+        except lockfile.UnlockError:
+            pass
 
 
 def test_commit(id):

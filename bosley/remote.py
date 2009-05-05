@@ -15,7 +15,7 @@ class DiscoveryError(Exception):
 
 def query(url):
     # Sometimes the tests hang, so use an explicit timeout.
-    h = httplib2.Http(timeout=60)
+    h = httplib2.Http(timeout=120)
     resp, content = h.request(settings.BASE + url)
     # Force XML parser so we're not forgiving on errors.  Exceptions induce
     # invalid output, so we want those caught and shown as an error.

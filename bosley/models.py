@@ -46,6 +46,7 @@ class TestFile(Base, Model):
     def failing(cls, revision):
         return cls.join_results(revision).filter(Result.fail == True)
 
+    @property
     def target_url(self):
         """Returns an absolute URL where this test was run."""
         return settings.TEST_URL % self.name

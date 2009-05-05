@@ -5,8 +5,9 @@ from operator import attrgetter
 
 from pyquery import PyQuery
 from werkzeug import Client, BaseResponse
+from nose.tools import eq_
 
-from bosley import utils, views
+from bosley import utils, views, settings
 from bosley.application import Application
 
 import fixtures
@@ -78,3 +79,5 @@ class TestViews(fixtures.BaseCase):
         assert equiv(d('#testfiles').text(), text)
         assert d('.new .test').text() == 'testConfig'
         assert d('.broke .test').text() == 'testFallback'
+
+        eq_(d('.testfile').attr('href'), settings.TEST_URL % 'config.test')

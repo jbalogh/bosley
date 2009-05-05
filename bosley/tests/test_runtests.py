@@ -19,8 +19,8 @@ def methods(mock):
 
 class TestCase(fixtures.BaseCase):
 
-    @patch('bosley.runtests.vcs')
     @patch('bosley.runtests.handle')
+    @patch('bosley.runtests.vcs')
     def test_update(self, vcs_mock, handle_mock):
         commit_mock = Mock()
         commit_mock.id = 3
@@ -34,8 +34,8 @@ class TestCase(fixtures.BaseCase):
         handle_mock.assert_called_with(3)
         assert handle_mock.call_count == 2
 
-    @patch('bosley.runtests.vcs')
     @patch('bosley.runtests.process_commits')
+    @patch('bosley.runtests.vcs')
     def test_backfill(self, vcs_mock, process_mock):
         vcs_mock.before.return_value = sentinel.Before
         runtests.backfill()
@@ -47,9 +47,9 @@ class TestCase(fixtures.BaseCase):
         vcs_mock.before.return_value = sentinel.Before2
         assert generator.next() == sentinel.Before2
 
-    @patch('bosley.runtests.vcs')
-    @patch('bosley.runtests.process_commits')
     @patch('bosley.runtests.Revision')
+    @patch('bosley.runtests.process_commits')
+    @patch('bosley.runtests.vcs')
     def test_backfill_first_call(self, vcs_mock, process_mock, revision_mock):
         mock_query = Mock()
         mock_query.first.return_value = None
@@ -61,8 +61,8 @@ class TestCase(fixtures.BaseCase):
         generator = process_mock.call_args[0][0]
         assert generator.next() == sentinel.Commit
 
-    @patch('bosley.runtests.vcs.info')
     @patch('bosley.runtests.test_revision')
+    @patch('bosley.runtests.vcs.info')
     def test_test_commit(self, info_mock, test_revision_mock):
         git_id = '3' * 40
         info_mock.return_value = {'git_id': git_id,
@@ -71,8 +71,8 @@ class TestCase(fixtures.BaseCase):
         runtests.test_commit(sentinel.id)
         assert Revision.q.filter_by(git_id=git_id).count() == 1
 
-    @patch('bosley.runtests.vcs.info')
     @patch('bosley.runtests.test_revision')
+    @patch('bosley.runtests.vcs.info')
     def test_test_commit_existing(self, info_mock, test_revision_mock):
         info_mock.return_value = {'git_id': '2' * 40}
         runtests.test_commit(sentinel.id)
@@ -115,7 +115,7 @@ class TestCase(fixtures.BaseCase):
     @patch('bosley.runtests.remote.analyze2')
     def test_test_runner_error(self, analyze_mock):
 
-        def broken_test():
+        def broken_test(*args):
             raise remote.BrokenTest
         analyze_mock.side_effect = broken_test
 
@@ -127,9 +127,9 @@ class TestCase(fixtures.BaseCase):
         assert BrokenTest.q.filter_by(revision_id=rev).count() == 1
 
 
-@patch('bosley.runtests.backfill')
-@patch('bosley.runtests.update')
 @patch('sys.exit')
+@patch('bosley.runtests.update')
+@patch('bosley.runtests.backfill')
 def test_main(backfill_mock, update_mock, exit_mock):
     # Save it so we can reset it later.
     _argv = sys.argv
@@ -142,7 +142,7 @@ def test_main(backfill_mock, update_mock, exit_mock):
     runtests.main()
     assert backfill_mock.called
 
-    def system_exit():
+    def system_exit(*args):
         raise SystemExit
     exit_mock.side_effect = system_exit
 
@@ -158,9 +158,9 @@ def test_main(backfill_mock, update_mock, exit_mock):
     sys.argv = _argv
 
 
-@patch('bosley.runtests.vcs')
-@patch('bosley.runtests.remote.cases')
 @patch('bosley.runtests.test_commit')
+@patch('bosley.runtests.remote.cases')
+@patch('bosley.runtests.vcs')
 def test_handle(vcs_mock, remote_mock, test_commit_mock):
     commit = sentinel.Commit
     runtests.handle(commit)
@@ -173,12 +173,12 @@ def test_handle(vcs_mock, remote_mock, test_commit_mock):
     test_commit_mock.assert_called_with(commit)
 
 
-@patch('bosley.runtests.vcs')
-@patch('bosley.runtests.remote.cases')
 @patch('bosley.runtests.test_commit')
+@patch('bosley.runtests.remote.cases')
+@patch('bosley.runtests.vcs')
 def test_handle_error(vcs_mock, remote_mock, test_commit_mock):
 
-    def discovery_error():
+    def discovery_error(*args):
         raise remote.DiscoveryError
     remote_mock.side_effect = discovery_error
 

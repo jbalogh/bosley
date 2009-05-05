@@ -9,8 +9,8 @@ from bosley import remote, settings
 import fixtures
 
 
-@patch('bosley.remote.PyQuery')
 @patch('bosley.remote.httplib2.Http.request')
+@patch('bosley.remote.PyQuery')
 def test_query(pq_mock, request_mock):
     request_mock.return_value = sentinel.response, sentinel.content
     url = 'foo'
@@ -34,7 +34,7 @@ def test_test(query_mock):
     query_mock.assert_called_with('case=%s' % case)
 
 
-def syntax_error():
+def syntax_error(*args):
     # Requires positional args, don't care what they are.
     raise XMLSyntaxError(1, 2, 3, 4)
 

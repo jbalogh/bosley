@@ -43,9 +43,9 @@ class TestPlugins(fixtures.BaseCase):
         assert runtests_mock.update.called
         assert bot_mock.run_command.called is False
 
-    @patch('bosley.plugins.runtests')
-    @patch('bosley.plugins.Revision')
     @patch('bosley.plugins.st')
+    @patch('bosley.plugins.Revision')
+    @patch('bosley.plugins.runtests')
     def test_updater_changes(self, runtests_mock, revision_mock, st_mock):
         bot_mock, q_mock = Mock(), Mock()
         revision_mock.q.order_by.return_value = q_mock
@@ -56,7 +56,7 @@ class TestPlugins(fixtures.BaseCase):
         assert runtests_mock.update.called
         assert bot_mock.run_command.called
 
-        runtests_mock._reset(), bot_mock._reset()
+        runtests_mock.reset_mock(), bot_mock.reset_mock()
 
         st_mock.return_value = 1, 0, 0
         plugins.updater(bot_mock)

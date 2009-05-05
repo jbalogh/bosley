@@ -8,7 +8,7 @@ httplib2==0.4.0
 ipython==0.9.1
 lockfile==0.8
 lxml==2.2
-mock==0.4.0
+mock==0.5.0
 nose==0.10.4
 pyflakes==0.3.0
 pyquery==0.3.1

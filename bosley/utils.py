@@ -1,3 +1,4 @@
+import functools
 import re
 
 from jinja2 import Environment, FileSystemLoader
@@ -46,9 +47,19 @@ jinja_env = Environment(loader=FileSystemLoader(settings.TEMPLATE_PATH))
 jinja_env.globals['url_for'] = url_for
 
 
-def render_template(template, **context):
+def _render(request, context, template=None):
     return Response(jinja_env.get_template(template).render(**context),
                     mimetype='text/html')
+
+
+def render(template=None):
+    def decorator(f):
+        @functools.wraps(f)
+        def inner(request, *args, **kwargs):
+            context = f(request, *args, **kwargs)
+            return _render(request, context, template)
+        return inner
+    return decorator
 
 
 def force_unicode(s, encoding='utf-8', errors='strict'):

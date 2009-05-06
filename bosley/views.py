@@ -6,7 +6,7 @@ from sqlalchemy.orm import eagerload_all
 
 from models import Revision, Assertion, TestFile, Result, Test
 from paginator import Paginator
-from utils import expose, render_template
+from utils import expose, render
 
 
 PER_PAGE = 20
@@ -14,13 +14,15 @@ PER_PAGE = 20
 
 @expose('/list/', defaults={'page': 1})
 @expose('/list/<int:page>')
+@render(template='revision_list.html')
 def revision_list(request, page):
     revisions = Revision.q.order_by(Revision.date.desc())
     page = Paginator(revisions, PER_PAGE).page(page)
-    return render_template('revision_list.html', page=page)
+    return {'page': page}
 
 
 @expose('/r/<int:rev>')
+@render(template='revision_detail.html')
 def revision_detail(request, rev):
     revision = Revision.q.filter_by(svn_id=rev).one()
     previous = (Revision.q.filter(Revision.svn_id < rev)
@@ -42,10 +44,9 @@ def revision_detail(request, rev):
         fail_list = failures.setdefault(test.testfile.id, [])
         fail_list.append((test.name, list(assertions)))
 
-    return render_template('revision_detail.html', revision=revision,
-                           failing=failing, failures=failures,
-                           diff=Diff(revision, previous),
-                           broken=revision.broken_tests)
+    return {'revision': revision, 'diff': Diff(revision, previous),
+            'failing': failing, 'failures': failures,
+            'broken': revision.broken_tests}
 
 
 def r(svn_id):

@@ -7,20 +7,23 @@ from pyquery import PyQuery
 from werkzeug import Client, BaseResponse
 from nose.tools import eq_
 
-from bosley import utils, views, settings
+from bosley import utils, settings
 from bosley.application import Application
 
 import fixtures
 from multipart import post_multipart
 
 
-# Hijack render_template to store the name and context.
-def render(template, **context):
-    # Not threadsafe.
-    BaseResponse.template_name = template
-    BaseResponse.template_context = context
-    return utils.render_template(template, **context)
-views.render_template = render
+# Hijack _render to store the template name and context.
+def hijack_render(old_render):
+    def new_render(request, context, template=None):
+        response = old_render(request, context, template)
+        # Won't work if there's more than one BaseResponse in use.
+        BaseResponse.template_name = template
+        BaseResponse.template_context = context
+        return response
+    utils._render = new_render
+hijack_render(utils._render)
 
 
 def get(url, status_code=200, template_name=''):

@@ -30,6 +30,15 @@ url_map = Map([
     Rule('/media/<file>', endpoint='media', build_only=True),
 ])
 
+jinja_env = Environment(loader=FileSystemLoader(settings.TEMPLATE_PATH))
+
+
+def add_to(dict, name=None):
+    def decorator(f):
+        dict[name or f.__name__] = f
+        return f
+    return decorator
+
 
 def expose(rule, **kw):
     def decorate(f):
@@ -39,12 +48,9 @@ def expose(rule, **kw):
     return decorate
 
 
+@add_to(jinja_env.globals)
 def url_for(endpoint, _external=False, **values):
     return local.url_adapter.build(endpoint, values, force_external=_external)
-
-
-jinja_env = Environment(loader=FileSystemLoader(settings.TEMPLATE_PATH))
-jinja_env.globals['url_for'] = url_for
 
 
 def _render(request, context, template=None):
@@ -77,6 +83,7 @@ def force_unicode(s, encoding='utf-8', errors='strict'):
     return s
 
 
+@add_to(jinja_env.filters)
 def perlsub(string, regex, replacement):
     """Does a regex sub; the replacement string can have $n groups."""
     def sub(match):
@@ -91,5 +98,3 @@ def perlsub(string, regex, replacement):
                 ret.append(s)
         return ''.join(ret)
     return re.sub(regex, sub, string)
-
-jinja_env.filters['perlsub'] = perlsub

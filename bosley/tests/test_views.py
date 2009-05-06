@@ -26,11 +26,12 @@ def hijack_render(old_render):
 hijack_render(utils._render)
 
 
-def get(url, status_code=200, template_name=''):
+def get(url, status_code=200, template_name='', accept='text/html'):
     def inner(f):
         @functools.wraps(f)
         def wrapper(self):
-            response = Client(Application(), BaseResponse).get(url)
+            client = Client(Application(), BaseResponse)
+            response = client.get(url, headers={'Accept': accept})
             assert response.status_code == status_code
             if template_name:
                 assert response.template_name == template_name

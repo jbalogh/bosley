@@ -4,6 +4,7 @@ import re
 from jinja2 import Environment, FileSystemLoader
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+import werkzeug
 from werkzeug import Local, LocalManager, Response
 from werkzeug.routing import Map, Rule
 
@@ -53,9 +54,34 @@ def url_for(endpoint, _external=False, **values):
     return local.url_adapter.build(endpoint, values, force_external=_external)
 
 
+def html_responder(request, context, template):
+    return jinja_env.get_template(template).render(**context)
+
+def json_responder(request, context):
+    return simplejson.dumps(**context)
+
+responders = {
+    'text/html': html_responder,
+    'text/javascript': json_responder
+}
+
+# Sucky things about this:
+# 1. Special casing for template.
+# 2. multiple mimetypes for responder (e.g. application/json)
+#    are possible, but not pretty
+# 3. No extra args to Response, like status
 def _render(request, context, template=None):
-    return Response(jinja_env.get_template(template).render(**context),
-                    mimetype='text/html')
+    for mimetype in request.accept_mimetypes.itervalues():
+        if mimetype in responders:
+            responder = responders[mimetype]
+            if template:
+                content = responder(request, context, template)
+            else:
+                content = responder(request, context)
+            return Response(content, mimetype=mimetype)
+    else:
+        # Should have more details, need to understand the spec.
+        raise werkzeug.exceptions.NotAcceptable()
 
 
 def render(template=None):

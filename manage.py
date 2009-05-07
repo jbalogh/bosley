@@ -1,9 +1,10 @@
+import werkzeug
 from werkzeug import script
 
 
 def make_app():
     from bosley.application import Application
-    return Application()
+    return werkzeug.DebuggedApplication(Application(), evalex=True)
 
 
 def make_shell():

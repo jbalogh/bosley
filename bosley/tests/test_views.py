@@ -4,10 +4,11 @@ import functools
 from operator import attrgetter
 
 from pyquery import PyQuery
-from werkzeug import Client, BaseResponse
+from werkzeug import Client, BaseResponse, Request, EnvironBuilder
 from nose.tools import eq_
+from mock import patch, sentinel
 
-from bosley import utils, settings
+from bosley import settings, utils, views
 from bosley.application import Application
 
 import fixtures
@@ -85,3 +86,28 @@ class TestViews(fixtures.BaseCase):
         assert d('.broke .test').text() == 'testFallback'
 
         eq_(d('.testfile').attr('href'), settings.TEST_URL % 'config.test')
+
+
+@patch('bosley.views.lockfile')
+@patch('bosley.views.Revision')
+@patch('bosley.views.utils')
+def test_status(utils_mock, revision_mock, lock_mock):
+    q_mock = revision_mock.q.order_by.return_value.first.return_value
+    q_mock.svn_id = sentinel.svn_id
+    is_locked = lock_mock.FileLock.return_value.is_locked
+
+    env = EnvironBuilder(headers={'Accept': 'text/javascript'}).get_environ()
+    request = Request(env)
+
+    is_locked.return_value = False
+    response = views.status(request)
+    eq_(response.status_code, 200)
+    eq_(response.template_context, {'busy': False})
+
+    is_locked.return_value = True
+    utils_mock.url_for.return_value = 32
+    response = views.status(request)
+    eq_(response.status_code, 200)
+    eq_(response.template_context, {'busy': True,
+                                    'latest': 32})
+    utils_mock.url_for.assert_called_with('revision_detail', sentinel.svn_id)

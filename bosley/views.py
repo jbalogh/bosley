@@ -1,12 +1,15 @@
 import itertools
 from operator import attrgetter
 
+import lockfile
 from sqlalchemy import func, and_
 from sqlalchemy.orm import eagerload_all
 
+import runtests
+import utils
 from models import Revision, Assertion, TestFile, Result, Test
 from paginator import Paginator
-from utils import expose, render
+from utils import expose, render, json
 
 
 PER_PAGE = 20
@@ -47,6 +50,17 @@ def revision_detail(request, rev):
     return {'revision': revision, 'diff': Diff(revision, previous),
             'failing': failing, 'failures': failures,
             'broken': revision.broken_tests}
+
+
+@json
+@expose('/status')
+def status(request):
+    busy = lockfile.FileLock(runtests.LOCKFILE_PATH).is_locked()
+    status = {'busy': busy}
+    if busy:
+        latest = Revision.q.order_by(Revision.svn_id.desc()).first()
+        status['latest'] = utils.url_for('revision_detail', latest.svn_id)
+    return status
 
 
 def r(svn_id):

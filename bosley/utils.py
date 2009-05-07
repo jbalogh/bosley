@@ -1,10 +1,11 @@
 import functools
 import re
 
+import simplejson
+import werkzeug
 from jinja2 import Environment, FileSystemLoader
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-import werkzeug
 from werkzeug import Local, LocalManager, Response
 from werkzeug.routing import Map, Rule
 
@@ -57,19 +58,22 @@ def url_for(endpoint, _external=False, **values):
 def html_responder(request, context, template):
     return jinja_env.get_template(template).render(**context)
 
+
 def json_responder(request, context):
-    return simplejson.dumps(**context)
+    return simplejson.dumps(context)
 
 responders = {
     'text/html': html_responder,
-    'text/javascript': json_responder
+    'text/javascript': json_responder,
 }
+
 
 # Sucky things about this:
 # 1. Special casing for template.
 # 2. multiple mimetypes for responder (e.g. application/json)
 #    are possible, but not pretty
 # 3. No extra args to Response, like status
+# 4. If no template is given (i.e. json only) it does the wrong thing.
 def _render(request, context, template=None):
     for mimetype in request.accept_mimetypes.itervalues():
         if mimetype in responders:
@@ -84,7 +88,7 @@ def _render(request, context, template=None):
         raise werkzeug.exceptions.NotAcceptable()
 
 
-def render(template=None):
+def render(template):
     def decorator(f):
         @functools.wraps(f)
         def inner(request, *args, **kwargs):
@@ -92,6 +96,10 @@ def render(template=None):
             return _render(request, context, template)
         return inner
     return decorator
+
+
+def json(f):
+    return render(None)(f)
 
 
 def force_unicode(s, encoding='utf-8', errors='strict'):

@@ -62,40 +62,38 @@ def html_responder(request, context, template):
 def json_responder(request, context):
     return simplejson.dumps(context)
 
-responders = {
-    'text/html': html_responder,
-    'text/javascript': json_responder,
-}
 
-
-# Sucky things about this:
-# 1. Special casing for template.
-# 2. multiple mimetypes for responder (e.g. application/json)
-#    are possible, but not pretty
-# 3. No extra args to Response, like status
-# 4. If no template is given (i.e. json only) it does the wrong thing.
-def _render(request, context, template=None):
-    for mimetype in request.accept_mimetypes.itervalues():
-        if mimetype in responders:
-            responder = responders[mimetype]
-            if template:
-                content = responder(request, context, template)
-            else:
-                content = responder(request, context)
-            return Response(content, mimetype=mimetype)
+def _render(request, context):
+    # Hardcoding FTW!
+    mimetypes = request.accept_mimetypes
+    if (mimetypes.accept_html or mimetypes.accept_xhtml) and context.template:
+        content = html_responder(request, context.context, context.template)
+        mimetype = 'text/html'
+    elif 'text/javascript' in mimetypes or 'application/json' in mimetypes:
+        content = json_responder(request, context.context)
+        mimetype = 'text/javascript'
     else:
-        # Should have more details, need to understand the spec.
+        # Should have details on what is acceptable.
         raise werkzeug.exceptions.NotAcceptable()
+    return Response(content, mimetype=mimetype, **context.kwargs)
 
 
-def render(template):
+def render(template=None):
     def decorator(f):
         @functools.wraps(f)
         def inner(request, *args, **kwargs):
             context = f(request, *args, **kwargs)
-            return _render(request, context, template)
+            context.template = template
+            return _render(request, context)
         return inner
     return decorator
+
+
+class Context(object):
+
+    def __init__(self, context, **kwargs):
+        self.context = context
+        self.kwargs = kwargs
 
 
 def json(f):

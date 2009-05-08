@@ -3,9 +3,10 @@ import sys
 import functools
 from operator import attrgetter
 
+import werkzeug
 from pyquery import PyQuery
 from werkzeug import Client, BaseResponse, Request, EnvironBuilder
-from nose.tools import eq_
+from nose.tools import eq_, assert_raises
 from mock import patch, sentinel
 
 from bosley import settings, utils, views
@@ -17,27 +18,26 @@ from multipart import post_multipart
 
 # Hijack _render to store the template name and context.
 def hijack_render(old_render):
-    def new_render(request, context, template=None):
-        response = old_render(request, context, template)
+    def new_render(request, context):
+        response = old_render(request, context)
         # Won't work if there's more than one BaseResponse in use.
-        BaseResponse.template_name = template
-        BaseResponse.template_context = context
+        BaseResponse.template = context.template
+        BaseResponse.context = context.context
         return response
     utils._render = new_render
 hijack_render(utils._render)
 
 
-def get(url, status_code=200, template_name='', accept='text/html'):
+def get(url, status_code=200, template='', accept='text/html'):
     def inner(f):
         @functools.wraps(f)
         def wrapper(self):
             client = Client(Application(), BaseResponse)
             response = client.get(url, headers={'Accept': accept})
             assert response.status_code == status_code
-            if template_name:
-                assert response.template_name == template_name
-            f(self, response, response.template_context,
-              PyQuery(response.data))
+            if template:
+                assert response.template ==template
+            f(self, response, response.context, PyQuery(response.data))
             # Validate after other tests so we know everything else works.
             # Hacky piggybacking on --verbose so tests go faster.
             if '--verbose' in sys.argv:
@@ -59,7 +59,7 @@ class TestViews(fixtures.BaseCase):
         self.client = Client(Application(), BaseResponse)
         fixtures.BaseCase.setUp(self)
 
-    @get('/list/', template_name='revision_list.html')
+    @get('/list/', template='revision_list.html')
     def test_revision_list(self, response, context, dom):
         assert map(attrgetter('svn_id'), context['page'].objects) == [2, 1]
         assert re.findall('(\d+) tests', dom('.total').text()) == ['5', '4']
@@ -69,7 +69,7 @@ class TestViews(fixtures.BaseCase):
             '1 failing test files, 1 broken.',
         ]))
 
-    @get('/r/2', template_name='revision_detail.html')
+    @get('/r/2', template='revision_detail.html')
     def test_revision_detail(self, response, context, d):
         assert context['revision'].svn_id == 2
         assert d('#stats').text() == '5 tests: +2 -3'
@@ -96,18 +96,22 @@ def test_status(utils_mock, revision_mock, lock_mock):
     q_mock.svn_id = sentinel.svn_id
     is_locked = lock_mock.FileLock.return_value.is_locked
 
-    env = EnvironBuilder(headers={'Accept': 'text/javascript'}).get_environ()
-    request = Request(env)
+    def request(accept):
+        env = EnvironBuilder(headers={'Accept': accept}).get_environ()
+        return Request(env)
 
     is_locked.return_value = False
-    response = views.status(request)
+    response = views.status(request('text/javascript'))
     eq_(response.status_code, 200)
-    eq_(response.template_context, {'busy': False})
+    eq_(response.context, {'busy': False})
 
     is_locked.return_value = True
     utils_mock.url_for.return_value = 32
-    response = views.status(request)
+    response = views.status(request('application/json'))
     eq_(response.status_code, 200)
-    eq_(response.template_context, {'busy': True,
-                                    'latest': 32})
+    eq_(response.context, {'busy': True,
+                           'latest': 32})
     utils_mock.url_for.assert_called_with('revision_detail', sentinel.svn_id)
+
+    assert_raises(werkzeug.exceptions.NotAcceptable,
+                  views.status, request('text/html'))

@@ -9,7 +9,7 @@ import runtests
 import utils
 from models import Revision, Assertion, TestFile, Result, Test
 from paginator import Paginator
-from utils import expose, render, json
+from utils import expose, render, json, Context
 
 
 PER_PAGE = 20
@@ -21,7 +21,7 @@ PER_PAGE = 20
 def revision_list(request, page):
     revisions = Revision.q.order_by(Revision.date.desc())
     page = Paginator(revisions, PER_PAGE).page(page)
-    return {'page': page}
+    return Context({'page': page})
 
 
 @expose('/r/<int:rev>')
@@ -47,9 +47,9 @@ def revision_detail(request, rev):
         fail_list = failures.setdefault(test.testfile.id, [])
         fail_list.append((test.name, list(assertions)))
 
-    return {'revision': revision, 'diff': Diff(revision, previous),
-            'failing': failing, 'failures': failures,
-            'broken': revision.broken_tests}
+    return Context({'revision': revision, 'diff': Diff(revision, previous),
+                    'failing': failing, 'failures': failures,
+                    'broken': revision.broken_tests})
 
 
 @json
@@ -60,7 +60,7 @@ def status(request):
     if busy:
         latest = Revision.q.order_by(Revision.svn_id.desc()).first()
         status['latest'] = utils.url_for('revision_detail', latest.svn_id)
-    return status
+    return Context(status)
 
 
 def r(svn_id):

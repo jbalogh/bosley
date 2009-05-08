@@ -59,7 +59,7 @@ def status(request):
     status = {'busy': busy}
     if busy:
         latest = Revision.q.order_by(Revision.svn_id.desc()).first()
-        status['latest'] = utils.url_for('revision_detail', latest.svn_id)
+        status['latest'] = utils.url_for('revision_detail', rev=latest.svn_id)
     return Context(status)
 
 

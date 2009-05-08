@@ -7,7 +7,7 @@ import werkzeug
 from pyquery import PyQuery
 from werkzeug import Client, BaseResponse, Request, EnvironBuilder
 from nose.tools import eq_, assert_raises
-from mock import patch, sentinel
+from mock import patch, sentinel, Mock
 
 from bosley import settings, utils, views
 from bosley.application import Application
@@ -34,7 +34,7 @@ def get(url, status_code=200, template='', accept='text/html'):
         def wrapper(self):
             client = Client(Application(), BaseResponse)
             response = client.get(url, headers={'Accept': accept})
-            assert response.status_code == status_code
+            eq_(response.status_code, status_code)
             if template:
                 assert response.template ==template
             f(self, response, response.context, PyQuery(response.data))
@@ -87,6 +87,14 @@ class TestViews(fixtures.BaseCase):
 
         eq_(d('.testfile').attr('href'), settings.TEST_URL % 'config.test')
 
+    lock_mock = Mock()
+    lock_mock.FileLock.return_value.is_locked.return_value = True
+
+    @patch('bosley.views.lockfile', lock_mock)
+    @get('/status', accept='text/javascript')
+    def test_status(self, response, context, d):
+        eq_(context['latest'], '/r/2')
+
 
 @patch('bosley.views.lockfile')
 @patch('bosley.views.Revision')
@@ -111,7 +119,8 @@ def test_status(utils_mock, revision_mock, lock_mock):
     eq_(response.status_code, 200)
     eq_(response.context, {'busy': True,
                            'latest': 32})
-    utils_mock.url_for.assert_called_with('revision_detail', sentinel.svn_id)
+    utils_mock.url_for.assert_called_with('revision_detail',
+                                          rev=sentinel.svn_id)
 
     assert_raises(werkzeug.exceptions.NotAcceptable,
                   views.status, request('text/html'))

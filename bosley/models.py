@@ -1,14 +1,14 @@
 # -*- delete-whitespace: t -*-
-import functools
 from datetime import datetime
 
-from sqlalchemy import Column, ForeignKey, schema, func, and_
+from sqlalchemy import Column, ForeignKey, schema, func
 from sqlalchemy.orm import dynamic_loader, relation
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.ext.declarative import declarative_base
 import sqlalchemy.types as fields
 
 import settings
+from cache import cached
 from utils import metadata, Session
 
 
@@ -93,12 +93,17 @@ class Revision(Base, Model):
     results = dynamic_loader('Result', backref='revision')
     broken_tests = dynamic_loader('BrokenTest', backref='revision')
 
+    @cached
     def assertion_stats(self):
         q = Result.q.filter_by(revision=self).group_by(Result.fail)
         passes, fails = map(lambda x: x[0], q.values(func.count()))
         return {'broken': self.broken_tests.count(),
                 'failing': TestFile.failing(self).distinct().count(),
                 'passes': passes, 'fails': fails, 'total': passes + fails}
+
+    @property
+    def cache_key(self):
+        return 'Revision:%s:%s' % (self.id, self.test_date)
 
 
 class BrokenTest(Base, Model):

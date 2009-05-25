@@ -27,9 +27,8 @@ def revision_list(request, page):
 @expose('/r/<int:rev>')
 @render(template='revision_detail.html')
 def revision_detail(request, rev):
-    revision = Revision.q.filter_by(svn_id=rev).one()
-    previous = (Revision.q.filter(Revision.svn_id < rev)
-                .order_by(Revision.svn_id.desc()).first())
+    q = Revision.q.filter(Revision.svn_id <= rev)
+    revision, previous = q.order_by(Revision.svn_id.desc())[:2]
 
     fail_count = func.count(Result.fail)
     failing = (TestFile.failing(revision).group_by(TestFile.id).

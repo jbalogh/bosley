@@ -10,3 +10,4 @@ src
 man
 share
 bosley/logs
+schema/settings.py

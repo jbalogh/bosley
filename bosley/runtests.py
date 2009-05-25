@@ -27,7 +27,6 @@ def handle(commit):
     # Don't block waiting for a lock. TODO: make this configurable.
     try:
         lock.acquire(0)
-
         log.debug('Processing %s' % commit)
         try:
             vcs.checkout(commit)

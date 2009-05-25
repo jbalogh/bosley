@@ -1,5 +1,6 @@
 # -*- delete-whitespace: t -*-
 import functools
+from datetime import datetime
 
 from sqlalchemy import Column, ForeignKey, schema, func, and_
 from sqlalchemy.orm import dynamic_loader, relation
@@ -87,7 +88,7 @@ class Revision(Base, Model):
     message = Column(fields.UnicodeText)
     author = Column(fields.Unicode(100))
     date = Column(fields.DateTime)
-    test_date = Column(fields.DateTime)
+    test_date = Column(fields.DateTime, default=datetime.now)
 
     results = dynamic_loader('Result', backref='revision')
     broken_tests = dynamic_loader('BrokenTest', backref='revision')

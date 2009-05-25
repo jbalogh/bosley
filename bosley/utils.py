@@ -75,7 +75,11 @@ def _render(request, context):
     else:
         # Should have details on what is acceptable.
         raise werkzeug.exceptions.NotAcceptable()
-    return Response(content, mimetype=mimetype, **context.kwargs)
+    response = Response(content, mimetype=mimetype, **context.kwargs)
+    headers = response.headers
+    headers.add_header('Vary', 'Accept')
+    headers.add_header('Cache-Control', 'public, must-revalidate, max-age=0')
+    return response
 
 
 def render(template=None):

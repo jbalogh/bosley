@@ -2,17 +2,24 @@ import itertools
 from operator import attrgetter
 
 import lockfile
+import werkzeug
 from sqlalchemy import func, and_
 from sqlalchemy.orm import eagerload_all
+from werkzeug.exceptions import HTTPException
 
 import runtests
 import utils
+from cache import get_cache_key
 from models import Revision, Assertion, TestFile, Result, Test
 from paginator import Paginator
 from utils import expose, render, json, Context
 
 
 PER_PAGE = 20
+
+
+class NotModified(HTTPException):
+    code = 304
 
 
 @expose('/list/', defaults={'page': 1})
@@ -24,11 +31,22 @@ def revision_list(request, page):
     return Context({'page': page})
 
 
+def check_cache(request, view_name, *cache_objects):
+    key = '%s-%s' % (view_name, '-'.join(map(get_cache_key, cache_objects)))
+    etag = werkzeug.generate_etag(key)
+    if werkzeug.is_resource_modified(request.environ, etag):
+        return etag
+    else:
+        raise NotModified
+
+
 @expose('/r/<int:rev>')
 @render(template='revision_detail.html')
 def revision_detail(request, rev):
     q = Revision.q.filter(Revision.svn_id <= rev)
     revision, previous = q.order_by(Revision.svn_id.desc())[:2]
+
+    etag = check_cache(request, 'revision_detail', revision, previous)
 
     fail_count = func.count(Result.fail)
     failing = (TestFile.failing(revision).group_by(TestFile.id).
@@ -48,7 +66,8 @@ def revision_detail(request, rev):
 
     return Context({'revision': revision, 'diff': Diff(revision, previous),
                     'failing': failing, 'failures': failures,
-                    'broken': revision.broken_tests})
+                    'broken': revision.broken_tests},
+                   headers={'Etag': etag})
 
 
 @json

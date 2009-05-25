@@ -44,6 +44,9 @@ class Bot(irclib.SimpleIRCClient, register.Commander):
         log(e)
         super(Bot, self)._dispatcher(c, e)
 
+    def on_disconnect(self, c, e):
+        super(Bot, self).connect(self.server, self.port, self.nick)
+
     def on_welcome(self, c, e):
         c.join(self.channel)
 

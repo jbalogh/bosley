@@ -87,6 +87,7 @@ class Revision(Base, Model):
     message = Column(fields.UnicodeText)
     author = Column(fields.Unicode(100))
     date = Column(fields.DateTime)
+    test_date = Column(fields.DateTime)
 
     results = dynamic_loader('Result', backref='revision')
     broken_tests = dynamic_loader('BrokenTest', backref='revision')

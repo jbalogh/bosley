@@ -18,7 +18,7 @@
     <span class="passing">+{{ stats['passes'] }}</span>
     <span class="failing">-{{ stats['fails'] }}</span>
   </p>
-  <h4>Failing Tests</h4>
+  <h4 id='failing-tests'>Failing Tests</h4>
   <ul id="testfiles">
     {% for testfile, fail_count in failing %}
       <li>
@@ -44,15 +44,16 @@
       </li>
     {% endfor %}
   </ul>
-  <h4>Broken Tests</h4>
-  <ul id="broken">
-    {% for b in broken %}
-      <li>
-        <a class="testfile" href="{{ b.testfile.target_url }}">
-          {{ b.testfile.name }}
-        </a>
-      </li>
-    {% endfor %}
-  </ul>
-
+  {% if broken %}
+    <h4 id='broken-tests'>Broken Tests</h4>
+    <ul id="broken">
+      {% for b in broken %}
+        <li>
+          <a class="testfile" href="{{ b.testfile.target_url }}">
+            {{ b.testfile.name }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
 {% endblock %}

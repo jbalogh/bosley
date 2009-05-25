@@ -85,6 +85,9 @@ class TestViews(fixtures.BaseCase):
         assert d('.new .test').text() == 'testConfig'
         assert d('.broke .test').text() == 'testFallback'
 
+        # Make sure the headings are there.
+        assert d('#failing-tests, #broken-tests').size() == 2
+
         eq_(d('.testfile').attr('href'), settings.TEST_URL % 'config.test')
 
     lock_mock = Mock()
@@ -124,3 +127,13 @@ def test_status(utils_mock, revision_mock, lock_mock):
 
     assert_raises(werkzeug.exceptions.NotAcceptable,
                   views.status, request('text/html'))
+
+
+def test_no_broken():
+    """Shouldn't render "Broken Tests" section."""
+    context = {'broken': []}
+    for name in ('revision', 'diff', 'failing', 'failures'):
+        context[name] = Mock()
+    d = PyQuery(utils.html_responder(Mock(), context, 'revision_detail.html'))
+    assert d('#broken-tests').size() == 0
+    assert d('#broken').size() == 0

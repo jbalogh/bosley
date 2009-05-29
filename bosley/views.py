@@ -69,7 +69,7 @@ def revision_detail(request, rev):
     failures = {}
     for test, assertions in itertools.groupby(q, attrgetter('test')):
         fail_list = failures.setdefault(test.testfile.id, [])
-        fail_list.append((test.name, list(assertions)))
+        fail_list.append((test, list(assertions)))
 
     return Context({'revision': revision, 'diff': Diff(revision, previous),
                     'failing': failing, 'failures': failures,
@@ -92,7 +92,7 @@ def r(svn_id):
     q = (Result.q.join(Revision).join(Assertion).join(Test)
          .filter(and_(Revision.svn_id == svn_id, Result.fail == True))
          .group_by(Test.id))
-    return list(q.values(Test.name, func.count(Test.id)))
+    return list(q.values(Test.id, func.count(Test.id)))
 
 
 class Diff(object):
@@ -106,14 +106,14 @@ class Diff(object):
         self.broke, self.fixed, self.new = [], [], []
 
         b_dict = dict(self.b)
-        for a_name, a_num in self.diff:
-            if a_name in b_dict:
-                if a_num > b_dict[a_name]:
-                    self.broke.append(a_name)
+        for a_id, a_num in self.diff:
+            if a_id in b_dict:
+                if a_num > b_dict[a_id]:
+                    self.broke.append(a_id)
                 else:
-                    self.fixed.append(a_name)
+                    self.fixed.append(a_id)
             else:
-                self.new.append(a_name)
+                self.new.append(a_id)
 
     def category(self, name):
         """Return the category the test falls in as a string."""

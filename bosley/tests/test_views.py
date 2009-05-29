@@ -11,6 +11,7 @@ from mock import patch, sentinel, Mock
 
 from bosley import settings, utils, views
 from bosley.application import Application
+from bosley.models import Revision
 
 import fixtures
 from multipart import post_multipart
@@ -102,6 +103,15 @@ class TestViews(fixtures.BaseCase):
     @get('/status', accept='text/javascript')
     def test_status(self, response, context, d):
         eq_(context['latest'], '/r/2')
+
+    def test_diff(self):
+        a, b = Revision.q.order_by(Revision.svn_id.desc())[:2]
+        d = views.Diff(a, b)
+        data = self.data.TestData
+        eq_(d.fixed, [])
+        eq_(d.broke, [data.testFallback.id])
+        eq_(d.new, [data.testFallbackInConfig.id,
+                    data.testConfig.id])
 
 
 @patch('bosley.views.lockfile')

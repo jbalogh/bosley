@@ -27,9 +27,9 @@
         </a>
         (<span class="failing">{{ fail_count }}</span>)
         <ul class="tests">
-          {% for (test_name, assertions) in failures[testfile.id] %}
-            <li class="{{ diff.category(test_name) }}">
-              <span class="test">{{ test_name }}</span>
+          {% for (test, assertions) in failures[testfile.id] %}
+            <li class="{{ diff.category(test.id) }}">
+              <span class="test">{{ test.name }}</span>
               <ul class="assertions">
                 {% for fail in assertions %}
                   <li class="assertion">

@@ -1,3 +1,4 @@
+import logging
 import itertools
 from operator import attrgetter
 
@@ -14,6 +15,8 @@ from models import Revision, Assertion, TestFile, Result, Test
 from paginator import Paginator
 from utils import expose, render, json, Context
 
+
+log = logging.getLogger(__file__)
 
 PER_PAGE = 20
 
@@ -35,8 +38,10 @@ def check_cache(request, view_name, *cache_objects):
     key = '%s-%s' % (view_name, '-'.join(map(get_cache_key, cache_objects)))
     etag = werkzeug.generate_etag(key)
     if werkzeug.is_resource_modified(request.environ, etag):
+        log.info('No etag match')
         return etag
     else:
+        log.info('Not modified!')
         raise NotModified
 
 

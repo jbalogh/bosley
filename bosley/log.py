@@ -17,7 +17,7 @@ def stab_java():
                                           when='D', interval=3, backupCount=3)
     h.setLevel(level)
 
-    f = logging.Formatter('%(asctime)s %(levelname)s:%(name)s:%(message)s')
+    f = logging.Formatter('%(asctime)s %(levelname)s:%(module)s: %(message)s')
     h.setFormatter(f)
 
     logging.root.addHandler(h)

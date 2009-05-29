@@ -4,6 +4,7 @@ from __future__ import with_statement
 from datetime import datetime
 
 from mock import patch
+from nose.tools import eq_
 
 from bosley.models import Revision, Assertion
 from bosley.tests import fixtures
@@ -17,8 +18,8 @@ class TestRevisionModel(fixtures.BaseCase):
         assert stats['broken'] == 1
         assert stats['failing'] == 2
         assert stats['passes'] == 2
-        assert stats['fails'] == 3
-        assert stats['total'] == 5
+        assert stats['fails'] == 4
+        assert stats['total'] == 6
 
     def test_unicode(self):
         session = Revision.q.session
@@ -27,14 +28,15 @@ class TestRevisionModel(fixtures.BaseCase):
         session.add(r)
         session.commit()
 
-    @patch('bosley.cache._cache')
+    @patch('bosley.cache.cache')
     def test_cache(self, cache_mock):
         cache_mock.get.return_value = None
 
         rev = Revision.q.filter_by(svn_id=2).one()
         stats = rev.assertion_stats()
 
-        key = rev.cache_key
+        # The key is the function name plus the args.
+        key = 'assertion_stats:' + rev.cache_key
         cache_mock.get.assert_called_with(key)
         # The first positional argument is the key.
         assert cache_mock.set.call_args[0][0] == key
@@ -45,13 +47,13 @@ class TestRevisionModel(fixtures.BaseCase):
         old_stats = rev.assertion_stats()
 
         rev.test_date = datetime.now()
-        new_key = rev.cache_key
+        new_key = 'assertion_stats:' + rev.cache_key
 
         assert old_key != new_key
 
-        with patch('bosley.cache._cache.set') as cache_set_mock:
+        with patch('bosley.cache.cache.set') as cache_set_mock:
             new_stats = rev.assertion_stats()
-            assert cache_set_mock.call_args[0][0] == new_key
+            eq_(cache_set_mock.call_args[0][0], new_key)
 
 
 class TestAssertionModel(fixtures.BaseCase):

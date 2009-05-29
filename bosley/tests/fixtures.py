@@ -50,6 +50,11 @@ class TestData(fixture.DataSet):
         testfile = TestFileData.config
         name = 'testConfig'
 
+    # Same test name, different file.
+    class testFallbackInConfig:
+        name = 'testFallback'
+        testfile = TestFileData.config
+
 
 class AssertionData(fixture.DataSet):
 
@@ -57,19 +62,25 @@ class AssertionData(fixture.DataSet):
         text = u'Default shadow db....'
         test = TestData.testDefaults
 
-    class fallback(default):
+    class fallback:
         text = u'Fallback to shadow...'
         test = TestData.testFallback
 
     class enabled(fallback):
         text = u'Shadow databases are...'
+        test = TestData.testFallback
 
-    class disabled(fallback):
+    class disabled:
         text = u'Disabled shadow databases...'
+        test = TestData.testFallback
 
     class config:
         text = u'Config bla bla...'
         test = TestData.testConfig
+
+    class fallbackInConfig:
+        text = u'Same test name, different file'
+        test = TestData.testFallbackInConfig
 
 
 class BrokenTestData(fixture.DataSet):
@@ -91,14 +102,17 @@ class ResultData(fixture.DataSet):
         revision = RevisionData.r1
 
     class fallback_r1(default_r1):
+        fail = False
         assertion = AssertionData.fallback
 
     class disabled_r1(default_r1):
         assertion = AssertionData.disabled
+        assertion = AssertionData.fallback
+        fail = False
 
     class enabled_r1(default_r1):
-        assertion = AssertionData.enabled
         fail = True
+        assertion = AssertionData.enabled
 
     class default_r2(default_r1):
         revision = RevisionData.r2
@@ -114,7 +128,12 @@ class ResultData(fixture.DataSet):
         revision = RevisionData.r2
 
     class config_r2(fallback_r2):
+        fail = True
         assertion = AssertionData.config
+
+    class config_fallback_r2(config_r2):
+        fail = True
+        assertion = AssertionData.fallbackInConfig
 
 
 class BaseCase(fixture.DataTestCase):

@@ -33,7 +33,7 @@ class TestPlugins(fixtures.BaseCase):
         bot_mock = Mock()
         plugins.status(bot_mock)
         bot_mock.say.assert_called_with(
-            'r2 (fred): -1 passing, +2 failing (%s)'
+            'r2 (fred): -1 passing, +3 failing (%s)'
             % settings.REVISION_DETAIL_URL % 2)
 
     @patch('bosley.plugins.runtests')
@@ -67,4 +67,4 @@ class TestPlugins(fixtures.BaseCase):
         bot_mock = Mock()
         plugins.report(bot_mock)
         calls = [args[0][0] for args in bot_mock.say.call_args_list]
-        assert calls == ['5 tests: +2 -3', '2 failing test files, 1 broken']
+        assert calls == ['6 tests: +2 -4', '2 failing test files, 1 broken']

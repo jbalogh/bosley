@@ -35,7 +35,9 @@ def revision_list(request, page):
 
 
 def check_cache(request, view_name, *cache_objects):
-    key = '%s-%s' % (view_name, '-'.join(map(get_cache_key, cache_objects)))
+    key = '%s-%s-%s' % (request.accept_mimetypes,
+                        view_name,
+                        '-'.join(map(get_cache_key, cache_objects)))
     etag = werkzeug.generate_etag(key)
     if werkzeug.is_resource_modified(request.environ, etag):
         log.info('No etag match')

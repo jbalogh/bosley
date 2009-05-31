@@ -7,10 +7,6 @@ from nose.tools import assert_raises
 from bosley import utils
 
 
-def test_perlsub():
-    assert utils.perlsub('foobar', '(foo)(bar)', '$2$1') == 'barfoo'
-
-
 @patch('bosley.utils.Response', Mock())
 @patch('bosley.utils.json_responder')
 @patch('bosley.utils.html_responder')

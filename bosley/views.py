@@ -8,6 +8,9 @@ from sqlalchemy import func, and_
 from sqlalchemy.orm import eagerload_all
 from werkzeug.exceptions import HTTPException
 
+# This sucks, but we need to import filters to make sure they're
+# in the environment.
+import filters
 import runtests
 import utils
 from cache import get_cache_key

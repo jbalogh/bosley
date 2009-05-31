@@ -4,7 +4,7 @@ from operator import attrgetter
 
 import lockfile
 import werkzeug
-from sqlalchemy import func, and_
+from sqlalchemy import func
 from sqlalchemy.orm import eagerload_all
 from werkzeug.exceptions import HTTPException
 
@@ -74,7 +74,7 @@ def revision_detail(request, rev):
         fail_list = failures.setdefault(test.testfile.id, [])
         fail_list.append((test, list(assertions)))
 
-    return Context({'revision': revision, 'diff': Diff(revision, previous),
+    return Context({'revision': revision, 'diff': revision.diff,
                     'failing': failing, 'failures': failures,
                     'broken': revision.broken_tests},
                    headers={'Etag': etag})
@@ -89,40 +89,3 @@ def status(request):
         latest = Revision.q.order_by(Revision.svn_id.desc()).first()
         status['latest'] = utils.url_for('revision_detail', rev=latest.svn_id)
     return Context(status)
-
-
-def r(svn_id):
-    q = (Result.q.join(Revision).join(Assertion).join(Test)
-         .filter(and_(Revision.svn_id == svn_id, Result.fail == True))
-         .group_by(Test.id))
-    return list(q.values(Test.id, func.count(Test.id)))
-
-
-class Diff(object):
-    """Analyze the differences between two revisions."""
-
-    def __init__(self, a, b):
-        """a and b are Revisions."""
-        self.a, self.b = r(a.svn_id), r(b.svn_id)
-        self.diff = set(self.a).difference(set(self.b))
-
-        self.broke, self.fixed, self.new = [], [], []
-
-        b_dict = dict(self.b)
-        for a_id, a_num in self.diff:
-            if a_id in b_dict:
-                if a_num > b_dict[a_id]:
-                    self.broke.append(a_id)
-                else:
-                    self.fixed.append(a_id)
-            else:
-                self.new.append(a_id)
-
-    def category(self, name):
-        """Return the category the test falls in as a string."""
-        # Mostly useful for templates.
-        for attr in ('new', 'broke', 'fixed'):
-            if name in getattr(self, attr):
-                return attr
-        else:
-            return ''

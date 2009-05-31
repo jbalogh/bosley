@@ -105,8 +105,7 @@ class TestViews(fixtures.BaseCase):
         eq_(context['latest'], '/r/2')
 
     def test_diff(self):
-        a, b = Revision.q.order_by(Revision.svn_id.desc())[:2]
-        d = views.Diff(a, b)
+        d = Revision.q.order_by(Revision.svn_id.desc()).first().diff
         data = self.data.TestData
         eq_(d.fixed, [])
         eq_(d.broke, [data.testFallback.id])

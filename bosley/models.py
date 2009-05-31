@@ -1,7 +1,7 @@
 # -*- delete-whitespace: t -*-
 from datetime import datetime
 
-from sqlalchemy import Column, ForeignKey, schema, func
+from sqlalchemy import Column, ForeignKey, schema, func, and_
 from sqlalchemy.orm import dynamic_loader, relation
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.ext.declarative import declarative_base
@@ -97,6 +97,45 @@ class Result(Base, Model):
     revision_id = Column(fields.Integer, ForeignKey('revisions.id'))
 
 
+def r(svn_id):
+    q = (Result.q.join(Revision).join(Assertion).join(Test)
+         .filter(and_(Revision.svn_id == svn_id, Result.fail == True))
+         .group_by(Test.id))
+    return list(q.values(Test.id, func.count(Test.id)))
+
+
+class Diff(object):
+    """Analyze the differences between two revisions."""
+
+    def __init__(self, a, b):
+        """a and b are Revisions."""
+        x, y = r(a.svn_id), r(b.svn_id)
+        diff = set(x).difference(set(y))
+
+        self.added = a.total - b.total
+
+        self.broke, self.fixed, self.new = [], [], []
+
+        b_dict = dict(y)
+        for a_id, a_num in diff:
+            if a_id in b_dict:
+                if a_num > b_dict[a_id]:
+                    self.broke.append(a_id)
+                else:
+                    self.fixed.append(a_id)
+            else:
+                self.new.append(a_id)
+
+    def category(self, name):
+        """Return the category the test falls in as a string."""
+        # Mostly useful for templates.
+        for attr in ('new', 'broke', 'fixed'):
+            if name in getattr(self, attr):
+                return attr
+        else:
+            return ''
+
+
 def stats(key):
     return property(lambda self: self.assertion_stats()[key])
 
@@ -126,6 +165,15 @@ class Revision(Base, Model):
                 'passes': passes, 'fails': fails, 'total': passes + fails}
 
     @property
+    def diff(self):
+        # Doing this weird to make caching work.
+        def differ(a, b):
+            return Diff(a, b)
+        prev = (Revision.q.filter(Revision.svn_id < self.svn_id)
+                .order_by(Revision.svn_id.desc()).first())
+        return cached(differ)(self, prev)
+
+    @property
     def cache_key(self):
         return 'Revision:%s:%s' % (self.id, self.test_date)
 
@@ -134,3 +182,7 @@ class Revision(Base, Model):
     passes = stats('passes')
     fails = stats('fails')
     total = stats('total')
+
+    @property
+    def added(self):
+        return self.diff.added

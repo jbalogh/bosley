@@ -1,6 +1,12 @@
 import re
 
+import settings
 from utils import add_to, jinja_env
+
+
+@add_to(jinja_env.filters)
+def bugzilla(text):
+    return perlsub(text, 'bug (\d+)', settings.BUGZILLA_BUG % '$1')
 
 
 @add_to(jinja_env.filters)

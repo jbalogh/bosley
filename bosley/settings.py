@@ -14,3 +14,5 @@ TEMPLATE_PATH = path('templates')
 REVISION_DETAIL_URL = 'http://jbalogh.khan.mozilla.org:5000/r/%s'
 
 TEST_URL = 'http://bot.khan.mozilla.org/amo/site/en-US/firefox/tests?case=%s'
+
+BUGZILLA_BUG = 'https://bugzilla.mozilla.org/show_bug.cgi?id=%s'

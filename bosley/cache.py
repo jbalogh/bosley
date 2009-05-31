@@ -1,5 +1,6 @@
 import logging
 
+import lockfile
 from werkzeug.contrib.cache import SimpleCache
 
 log = logging.getLogger(__file__)
@@ -17,6 +18,11 @@ def get_cache_key(o):
 
 def cached(f):
     def inner(*args, **kwargs):
+        # Don't cache anything if we're running tests.
+        import runtests
+        if lockfile.FileLock(runtests.LOCKFILE_PATH).is_locked():
+            return f(*args, **kwargs)
+
         keys = map(get_cache_key, args)
         for item in kwargs.items():
             keys.append('%s:%s' % get_cache_key(item))

@@ -55,6 +55,15 @@ class TestRevisionModel(fixtures.BaseCase):
             new_stats = rev.assertion_stats()
             eq_(cache_set_mock.call_args[0][0], new_key)
 
+    @patch('bosley.cache.lockfile.FileLock')
+    @patch('bosley.cache.cache')
+    def test_cache_running_tests(self, cache_mock, lock_mock):
+        lock_mock.return_value.is_locked.return_value = True
+
+        Revision.q.first().assertion_stats()
+        assert not cache_mock.get.called
+        assert not cache_mock.set.called
+
 
 class TestAssertionModel(fixtures.BaseCase):
 

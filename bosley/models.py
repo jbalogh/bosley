@@ -77,6 +77,26 @@ class Assertion(Base, Model):
     result = dynamic_loader('Result', backref='assertion')
 
 
+class BrokenTest(Base, Model):
+    __tablename__ = 'brokentests'
+    __table_args__ = (schema.UniqueConstraint('testfile_id', 'revision_id'),
+                      {})
+
+    id = Column(fields.Integer, primary_key=True)
+    testfile_id = Column(fields.Integer, ForeignKey('testfiles.id'))
+    revision_id = Column(fields.Integer, ForeignKey('revisions.id'))
+    testfile = relation('TestFile')
+
+
+class Result(Base, Model):
+    __tablename__ = 'results'
+
+    id = Column(fields.Integer, primary_key=True)
+    fail = Column(fields.Boolean)
+    assertion_id = Column(fields.Integer, ForeignKey('assertions.id'))
+    revision_id = Column(fields.Integer, ForeignKey('revisions.id'))
+
+
 class Revision(Base, Model):
     """A single revision in version control."""
     __tablename__ = 'revisions'
@@ -104,23 +124,3 @@ class Revision(Base, Model):
     @property
     def cache_key(self):
         return 'Revision:%s:%s' % (self.id, self.test_date)
-
-
-class BrokenTest(Base, Model):
-    __tablename__ = 'brokentests'
-    __table_args__ = (schema.UniqueConstraint('testfile_id', 'revision_id'),
-                      {})
-
-    id = Column(fields.Integer, primary_key=True)
-    testfile_id = Column(fields.Integer, ForeignKey('testfiles.id'))
-    revision_id = Column(fields.Integer, ForeignKey('revisions.id'))
-    testfile = relation('TestFile')
-
-
-class Result(Base, Model):
-    __tablename__ = 'results'
-
-    id = Column(fields.Integer, primary_key=True)
-    fail = Column(fields.Boolean)
-    assertion_id = Column(fields.Integer, ForeignKey('assertions.id'))
-    revision_id = Column(fields.Integer, ForeignKey('revisions.id'))

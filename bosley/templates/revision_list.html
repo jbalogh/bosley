@@ -12,7 +12,6 @@
 {% block content %}
   <dl>
     {% for revision in page.objects %}
-      {% set stats = revision.assertion_stats() %}
       <dt>
         <a href="{{ url_for('revision_detail', rev=revision.svn_id) }}">
           {{ revision.svn_id }}
@@ -22,13 +21,13 @@
       <dd class="author">{{ revision.author }}</dd>
       <dd class="message">{{ revision.message|e }}</dd>
       <dd>
-        <span class="total">{{ stats['total'] }} tests:</span>
-        <span class="passing">+{{ stats['passes'] }}</span>
-        <span class="failing">-{{ stats['fails'] }}</span>
+        <span class="total">{{ revision.total }} tests:</span>
+        <span class="passing">+{{ revision.passes }}</span>
+        <span class="failing">-{{ revision.fails }}</span>
       </dd>
       <dd class="files">
-        {{ stats['failing'] }} failing test files,
-        {{ stats['broken'] }} broken.
+        {{ revision.failing }} failing test files,
+        {{ revision.broken }} broken.
       </dd>
     {% endfor %}
   </dl>

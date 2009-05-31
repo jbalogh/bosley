@@ -97,6 +97,10 @@ class Result(Base, Model):
     revision_id = Column(fields.Integer, ForeignKey('revisions.id'))
 
 
+def stats(key):
+    return property(lambda self: self.assertion_stats()[key])
+
+
 class Revision(Base, Model):
     """A single revision in version control."""
     __tablename__ = 'revisions'
@@ -124,3 +128,9 @@ class Revision(Base, Model):
     @property
     def cache_key(self):
         return 'Revision:%s:%s' % (self.id, self.test_date)
+
+    broken = stats('broken')
+    failing = stats('failing')
+    passes = stats('passes')
+    fails = stats('fails')
+    total = stats('total')

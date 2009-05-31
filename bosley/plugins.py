@@ -29,9 +29,9 @@ def status(bot):
 
 def st():
     q = Revision.q.order_by(Revision.date.desc())
-    stats = [r.assertion_stats() for r in q[:2]]
-    passing = stats[0]['passes'] - stats[1]['passes']
-    failing = stats[0]['fails'] - stats[1]['fails']
+    a, b = q[:2]
+    passing = a.passes - b.passes
+    failing = a.fails - b.fails
     return q.first(), passing, failing
 
 

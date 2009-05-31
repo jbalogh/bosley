@@ -13,10 +13,9 @@
   <h3>{{ revision.date }}</h3>
   <p class="message">{{ revision.message|e }}</p>
   <p id="stats">
-    {% set stats = revision.assertion_stats() %}
-    {{ stats['total'] }} tests:
-    <span class="passing">+{{ stats['passes'] }}</span>
-    <span class="failing">-{{ stats['fails'] }}</span>
+    {{ revision.total }} tests:
+    <span class="passing">+{{ revision.passes }}</span>
+    <span class="failing">-{{ revision.fails }}</span>
   </p>
   <h4 id='failing-tests'>Failing Tests</h4>
   <ul id="testfiles">

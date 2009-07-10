@@ -78,5 +78,5 @@ class Bot(irclib.SimpleIRCClient, register.Commander):
 
 if __name__ == '__main__':
     bot = Bot()
-    bot.connect('irc.mozilla.org', 'bosley', '#amo')
+    bot.connect('irc.mozilla.org', 'bosley', '#bosley')
     bot.start()

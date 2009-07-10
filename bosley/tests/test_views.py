@@ -148,6 +148,10 @@ def test_no_broken():
     context = {'broken': []}
     for name in ('revision', 'diff', 'failing', 'failures'):
         context[name] = Mock()
+
+    r = context['revision']
+    r.svn_id = r.added = 3
+
     d = PyQuery(utils.html_responder(Mock(), context, 'revision_detail.html'))
     assert d('#broken-tests').size() == 0
     assert d('#broken').size() == 0

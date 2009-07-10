@@ -1,0 +1,22 @@
+{# Requires: `revision` #}
+
+{% set r = revision %}
+
+<div class="revision">
+  <h3> 
+    <a href="{{ url_for('revision_detail', rev=r.svn_id) }}">
+      {{ r.svn_id }}
+    </a>
+  </h3>
+  <span class="author">{{ r.author }}</span>
+  <q class="message">{{ r.message|e|bugzilla }}</q>
+  <span class="total">{{ r.total }} tests</span>
+  (<span class="added">{{ "%+d"|format(r.added) }}</span>):
+  {% if r.failing == 0 %}
+    <span class="omg">All passing!</span>
+  {% else %}
+    <span class="epic">
+      Failing: {{ r.new }} new, {{ r.old }} old
+    </span>
+  {% endif %}
+</div>

@@ -186,3 +186,11 @@ class Revision(Base, Model):
     @property
     def added(self):
         return self.diff.added
+
+    @property
+    def new(self):
+        return len(self.diff.new)
+
+    @property
+    def old(self):
+        return self.failing - self.new

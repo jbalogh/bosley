@@ -4,6 +4,7 @@ import sys
 import logging
 import itertools
 import threading
+import traceback
 from Queue import Queue
 
 import lockfile
@@ -122,6 +123,14 @@ class ThreadedTester2(threading.Thread):
         self.queue, self.rev = queue, rev
 
     def run(self):
+        """Wrapper around process_queue that logs exceptions."""
+        try:
+            self.process_queue()
+        except:
+            log.error(''.join(traceback.format_exception(*sys.exc_info())))
+            raise
+
+    def process_queue(self):
         self.session = TestFile.q.session
         while not self.queue.empty():
             testfile, _ = TestFile.get_or_create(name=force_unicode(self.queue.get()))

@@ -46,20 +46,32 @@ def handle(commit):
             pass
 
 
-def test_commit(id):
+def add_revision(id):
+    """Add a Revision for the given git hash."""
     revdata = vcs.info(id)
 
     if Revision.q.filter_by(git_id=revdata['git_id']).count() != 0:
         return
 
-    revdata['message'] = force_unicode(revdata['message'])
-    revdata['author'] = force_unicode(revdata['author'])
+    for key in 'message', 'author':
+        revdata[key] = force_unicode(revdata[key])
+
     revision = Revision(**revdata)
 
     session = Revision.q.session
     session.add(revision)
     with CommitLock:
         session.commit()
+
+    return revision
+
+
+def test_commit(id):
+    revision = add_revision(id)
+
+    if revision is None:
+        return
+
     try:
         # The object can't be shared across threads.
         test_revision(revision.id)
@@ -67,6 +79,8 @@ def test_commit(id):
         # Something bad happened, delete everything that was just created.
         for model in BrokenTest, Result:
             model.q.filter_by(revision=revision).delete()
+
+        session = Revision.q.session
         session.delete(revision)
         with CommitLock:
             session.commit()

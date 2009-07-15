@@ -1,6 +1,6 @@
 GitPython==0.1.6
 Jinja2==2.1.1
-SQLAlchemy==0.5.3
+SQLAlchemy==0.5.5
 Werkzeug==0.5
 -e git://github.com/jbalogh/check.git#egg=check
 fixture==1.1.2

@@ -84,7 +84,7 @@ class TestCase(fixtures.BaseCase):
         queue = [True, False]
         queue_mock.empty = queue.pop
 
-        testfile_name = 'testfile'
+        testfile_name = u'testfile'
         queue_mock.get.return_value = testfile_name
 
         tester = runtests.ThreadedTester2(queue_mock, 5)
@@ -110,7 +110,7 @@ class TestCase(fixtures.BaseCase):
         assert q.count() == 6
         assert q.filter_by(fail=True).count() == 1
         q = q.join(Assertion).join(Test)
-        assert q.filter(Test.name == 'testFallback').count() == 3
+        assert q.filter(Test.name == u'testFallback').count() == 3
 
     @patch('bosley.runtests.remote.analyze2')
     def test_test_runner_error(self, analyze_mock):

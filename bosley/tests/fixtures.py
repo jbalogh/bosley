@@ -28,31 +28,31 @@ class RevisionData(fixture.DataSet):
 class TestFileData(fixture.DataSet):
 
     class broken:
-        name = 'broken.tests'
+        name = u'broken.tests'
 
     class database:
-        name = 'database.tests'
+        name = u'database.tests'
 
     class config:
-        name = 'config.test'
+        name = u'config.test'
 
 
 class TestData(fixture.DataSet):
 
     class testDefaults:
-        name = 'testDefaults'
+        name = u'testDefaults'
         testfile = TestFileData.database
 
     class testFallback(testDefaults):
-        name = 'testFallback'
+        name = u'testFallback'
 
     class testConfig:
         testfile = TestFileData.config
-        name = 'testConfig'
+        name = u'testConfig'
 
     # Same test name, different file.
     class testFallbackInConfig:
-        name = 'testFallback'
+        name = u'testFallback'
         testfile = TestFileData.config
 
 

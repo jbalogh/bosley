@@ -35,7 +35,7 @@ class TestFile(Base, Model):
     __table_args__ = (schema.UniqueConstraint('name'), {})
 
     id = Column(fields.Integer, primary_key=True)
-    name = Column(fields.String(100))
+    name = Column(fields.Unicode(255))
     tests = dynamic_loader('Test', backref='testfile')
 
     @classmethod
@@ -61,7 +61,7 @@ class Test(Base, Model):
     __table_args__ = (schema.UniqueConstraint('name', 'testfile_id'), {})
 
     id = Column(fields.Integer, primary_key=True)
-    name = Column(fields.String(50))
+    name = Column(fields.Unicode(255))
     testfile_id = Column(fields.Integer, ForeignKey('testfiles.id'))
     assertion = dynamic_loader('Assertion', backref='test')
 
@@ -69,7 +69,6 @@ class Test(Base, Model):
 class Assertion(Base, Model):
     """ A single passing/failing assertion in a test."""
     __tablename__ = 'assertions'
-    __table_args__ = (schema.UniqueConstraint('text', 'test_id'), {})
 
     id = Column(fields.Integer, primary_key=True)
     text = Column(fields.UnicodeText)
@@ -149,7 +148,7 @@ class Revision(Base, Model):
     svn_id = Column(fields.Integer)
     git_id = Column(fields.String(40))
     message = Column(fields.UnicodeText)
-    author = Column(fields.Unicode(100))
+    author = Column(fields.Unicode(255))
     date = Column(fields.DateTime)
     test_date = Column(fields.DateTime, default=datetime.now)
 

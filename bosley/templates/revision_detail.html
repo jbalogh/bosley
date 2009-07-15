@@ -8,6 +8,9 @@
 {% endblock %}
 
 {% block content %}
+  <div class="include">
+    {% include "summary.html" %}
+  </div>
   <h1>r{{ revision.svn_id }}</h1>
   <h2>{{ revision.author }}</h2>
   <h3>{{ revision.date }}</h3>

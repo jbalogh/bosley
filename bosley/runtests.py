@@ -101,10 +101,7 @@ def test_revision(rev):
     for case in remote.cases():
         queue.put(case)
 
-    # XXX: testing speed is currently limited by languageConfig.test.php,
-    # which takes 30s to timeout.  The number of threads could be upped
-    # once this is fixed.
-    num_threads = 1
+    num_threads = 10
     threads = []
     for i in range(num_threads):
         t = ThreadedTester2(queue, rev)

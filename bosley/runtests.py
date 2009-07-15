@@ -46,9 +46,9 @@ def handle(commit):
             pass
 
 
-def add_revision(id):
+def add_revision(commit):
     """Add a Revision for the given git hash."""
-    revdata = vcs.info(id)
+    revdata = vcs.info(commit)
 
     if Revision.q.filter_by(git_id=revdata['git_id']).count() != 0:
         return
@@ -66,8 +66,8 @@ def add_revision(id):
     return revision
 
 
-def test_commit(id):
-    revision = add_revision(id)
+def test_commit(commit):
+    revision = add_revision(commit)
 
     if revision is None:
         return

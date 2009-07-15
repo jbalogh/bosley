@@ -4,7 +4,7 @@ from operator import itemgetter
 
 from pyquery import PyQuery
 from mock import patch, Mock, sentinel
-from nose.tools import assert_raises
+from nose.tools import assert_raises, eq_
 
 from bosley import runtests, remote
 from bosley.models import (Revision, TestFile, Assertion,
@@ -167,7 +167,7 @@ def test_handle(vcs_mock, remote_mock, test_commit_mock):
 
     vcs_mock.checkout.assert_called_with(commit)
     vcs_mock.reset.assert_called_with(commit)
-    assert methods(vcs_mock) == ['checkout', 'reset']
+    eq_(methods(vcs_mock), ['checkout', 'call', 'reset'])
 
     assert remote.cases.called
     test_commit_mock.assert_called_with(commit)
@@ -185,4 +185,4 @@ def test_handle_error(vcs_mock, remote_mock, test_commit_mock):
     commit = sentinel.Commit
     runtests.handle(commit)
 
-    assert methods(vcs_mock) == ['checkout', 'apply_testing_patch', 'reset']
+    eq_(methods(vcs_mock), ['checkout', 'call', 'apply_testing_patch', 'reset'])

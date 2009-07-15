@@ -30,6 +30,14 @@ def handle(commit):
         log.debug('Processing %s' % commit)
         try:
             vcs.checkout(commit)
+
+            try:
+                # TODO: fixme!
+                vcs.call('./reset.sh')
+            except vcs.CommandError:
+                add_revision(commit)
+                return
+
             try:
                 remote.cases()
             except remote.DiscoveryError:

@@ -12,8 +12,12 @@
   <q class="message">{{ r.message|e|bugzilla }}</q>
   <span class="total">{{ r.total }} tests</span>
   (<span class="added">{{ "%+d"|format(r.added) }}</span>):
-  {% if r.failing == 0 %}
-    <span class="omg">All passing!</span>
+  {% if r.fails == 0 %}
+    {% if r.total == 0 %}
+      <span>No tests?</span>
+    {% else %}
+      <span class="omg">All passing!</span>
+    {% endif %}
   {% else %}
     <span class="epic">
       Failing: {{ r.new }} new, {{ r.old }} old

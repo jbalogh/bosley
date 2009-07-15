@@ -133,7 +133,8 @@ class ThreadedTester2(threading.Thread):
     def process_queue(self):
         self.session = TestFile.q.session
         while not self.queue.empty():
-            testfile, _ = TestFile.get_or_create(name=force_unicode(self.queue.get()))
+            filename = force_unicode(self.queue.get())
+            testfile, _ = TestFile.get_or_create(name=filename)
             log.debug('%s: Testing %s...' % (self.getName(), testfile.name))
             self.test(testfile)
             self.session.add(testfile)
@@ -146,7 +147,8 @@ class ThreadedTester2(threading.Thread):
         try:
             results = remote.analyze2(testfile.name)
             for test_name, (passing, failing) in results.items():
-                test, _ = Test.get_or_create(name=force_unicode(test_name), testfile=testfile)
+                test, _ = Test.get_or_create(name=force_unicode(test_name),
+                                             testfile=testfile)
                 testfile.tests.append(test)
                 for assertion in itertools.chain(passing, failing):
                     a, _ = Assertion.get_or_create(

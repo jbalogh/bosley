@@ -158,7 +158,10 @@ class Revision(Base, Model):
     @cached
     def assertion_stats(self):
         q = Result.q.filter_by(revision=self).group_by(Result.fail)
-        passes, fails = map(lambda x: x[0], q.values(func.count()))
+        if q.count() is None:
+            passes = fails = 0
+        else:
+            passes, fails = [c[0] for c in  q.values(func.count())]
         return {'broken': self.broken_tests.count(),
                 'failing': TestFile.failing(self).distinct().count(),
                 'passes': passes, 'fails': fails, 'total': passes + fails}

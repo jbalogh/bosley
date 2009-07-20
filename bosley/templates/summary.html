@@ -9,7 +9,7 @@
     </a>
   </h3>
   <span class="author">{{ r.author }}</span>
-  <q class="message">{{ r.message|e|bugzilla }}</q>
+  <p class="message">{{ r.message|e|bugzilla }}</p>
   <span class="total">{{ r.total }} tests</span>
   (<span class="added">{{ "%+d"|format(r.added) }}</span>):
   {% if r.fails == 0 %}

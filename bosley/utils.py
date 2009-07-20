@@ -17,7 +17,8 @@ log.stab_java()
 
 
 def engine():
-    return create_engine(settings.DATABASE, convert_unicode=True)
+    return create_engine(settings.DATABASE, convert_unicode=True,
+                         pool_recycle=40)
 
 metadata = MetaData()
 Session = scoped_session(sessionmaker(bind=engine()))

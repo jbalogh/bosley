@@ -42,7 +42,13 @@ def handle(commit):
             try:
                 remote.cases()
             except remote.DiscoveryError:
-                vcs.apply_testing_patch()
+                try:
+                    vcs.apply_testing_patch()
+                except vcs.CommandError:
+                    log.info('no luck applying patch. SKIP')
+                    add_revision(commit)
+                    return
+
             test_commit(commit)
         finally:
             vcs.reset(commit)

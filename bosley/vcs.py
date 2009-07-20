@@ -70,8 +70,9 @@ def apply_testing_patch():
     try:
         call('git am %s' % settings.path('data/testing.patch'))
     except CommandError, status:
+        call('git am --abort')
         log.error('Failed to apply testing patch!')
-        sys.exit(status)
+        raise
 
 
 def reset(id):

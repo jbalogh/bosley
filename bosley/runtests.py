@@ -132,6 +132,8 @@ class ThreadedTester2(threading.Thread):
         except:
             log.error(''.join(traceback.format_exception(*sys.exc_info())))
             raise
+        finally:
+            self.session.close()
 
     def process_queue(self):
         self.session = TestFile.q.session
